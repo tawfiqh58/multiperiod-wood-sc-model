@@ -1,0 +1,7 @@
+github code link: 
+https://gist.github.com/samirsaci?page=4
+https://towardsdatascience.com/supply-chain-optimization-with-python-23ae9b28fd0b
+
+more
+https://www.samirsaci.com/
+https://aws.amazon.com/blogs/machine-learning/using-genetic-algorithms-on-aws-for-optimization-problems/
