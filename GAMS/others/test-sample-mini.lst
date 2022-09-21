@@ -1,0 +1,273 @@
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 10:36:20 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  Sets
+   2         n plant i
+   3         / NAmerica, SAmerica /
+   4         m market j
+   5         / NAmerica, SAmerica /
+   6  ;
+   7   
+   8  Parameter
+   9         Dj(m) demand from market j
+  10         / NAmerica 12, SAmerica 8 /
+  11         Ki(n) capacity of plant i
+  12         / NAmerica 10, SAmerica 10 /
+  13         fi(n) fixed cost of plant i
+  14         / NAmerica 6000, SAmerica 4500 /
+  15  ;
+  16   
+  17   
+  18  table cij(n,m) wholesaler vehicle
+  19                      NAmerica   SAmerica
+  20          NAmerica       81         92
+  21          SAmerica      117         77
+  22  ;
+  23   
+  24   
+  25  free variables
+  26       z;
+  27   
+  28  Variables
+  29   
+  30       xij(n,m) quantity shipped from plant i to market j;
+  31   
+  32  binary variables
+  33       yi(n) plant i on or off;
+  34   
+  35  Equations
+  36       cost
+  37       eqn1(m)
+  38       eqn2(n)
+  39       eqn3(n,m);
+  40   
+  41   
+  42  cost..    z  =e= sum(n,fi(n)*yi(n)) + sum(n,sum(m,cij(n,m)*xij(n,m)));
+  43  eqn1(m).. sum(n,xij(n,m)) =e= Dj(m);
+  44  eqn2(n).. sum(m,xij(n,m)) =l= Ki(n)*yi(n);
+  45  eqn3(n,m).. xij(n,m) =g= 0;
+  46   
+  47   
+  48  Model supplychainmodel /all/ ;
+  49   
+  50  Solve supplychainmodel using MIP minimizing z ;
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  39.2.0 e0c5072f WEX-WEI
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 10:36:20 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE supplychainmodel Using MIP From line 50
+
+
+---- cost  =E=  
+
+cost..  z - 81*xij(NAmerica,NAmerica) - 92*xij(NAmerica,SAmerica) - 117*xij(SAmerica,NAmerica) - 77*xij(SAmerica,SAmerica) - 6000*yi(NAmerica) - 4500*yi(SAmerica) =E= 0 ; (LHS = 0)
+     
+
+---- eqn1  =E=  
+
+eqn1(NAmerica)..  xij(NAmerica,NAmerica) + xij(SAmerica,NAmerica) =E= 12 ; (LHS = 0, INFES = 12 ****)
+     
+eqn1(SAmerica)..  xij(NAmerica,SAmerica) + xij(SAmerica,SAmerica) =E= 8 ; (LHS = 0, INFES = 8 ****)
+     
+
+---- eqn2  =L=  
+
+eqn2(NAmerica)..  xij(NAmerica,NAmerica) + xij(NAmerica,SAmerica) - 10*yi(NAmerica) =L= 0 ; (LHS = 0)
+     
+eqn2(SAmerica)..  xij(SAmerica,NAmerica) + xij(SAmerica,SAmerica) - 10*yi(SAmerica) =L= 0 ; (LHS = 0)
+     
+
+---- eqn3  =G=  
+
+eqn3(NAmerica,NAmerica)..  xij(NAmerica,NAmerica) =G= 0 ; (LHS = 0)
+     
+eqn3(NAmerica,SAmerica)..  xij(NAmerica,SAmerica) =G= 0 ; (LHS = 0)
+     
+eqn3(SAmerica,NAmerica)..  xij(SAmerica,NAmerica) =G= 0 ; (LHS = 0)
+     
+REMAINING ENTRY SKIPPED
+
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 10:36:20 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE supplychainmodel Using MIP From line 50
+
+
+---- z  
+
+z
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       cost
+
+
+---- xij  quantity shipped from plant i to market j
+
+xij(NAmerica,NAmerica)
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+      -81       cost
+        1       eqn1(NAmerica)
+        1       eqn2(NAmerica)
+        1       eqn3(NAmerica,NAmerica)
+
+xij(NAmerica,SAmerica)
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+      -92       cost
+        1       eqn1(SAmerica)
+        1       eqn2(NAmerica)
+        1       eqn3(NAmerica,SAmerica)
+
+xij(SAmerica,NAmerica)
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+     -117       cost
+        1       eqn1(NAmerica)
+        1       eqn2(SAmerica)
+        1       eqn3(SAmerica,NAmerica)
+
+REMAINING ENTRY SKIPPED
+
+---- yi  plant i on or off
+
+yi(NAmerica)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+    -6000       cost
+      -10       eqn2(NAmerica)
+
+yi(SAmerica)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+    -4500       cost
+      -10       eqn2(SAmerica)
+
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 10:36:20 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE supplychainmodel Using MIP From line 50
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 8.000E+00, 1.200E+01] - Zero values observed as well
+Bound     [min, max] : [ 1.000E+00, 1.000E+00] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 6.000E+03]
+
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 10:36:20 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE supplychainmodel Using MIP From line 50
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           4     SINGLE EQUATIONS            9
+BLOCKS OF VARIABLES           3     SINGLE VARIABLES            7
+NON ZERO ELEMENTS            21     DISCRETE VARIABLES          2
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  39.2.0 e0c5072f WEX-WEI
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 10:36:20 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE supplychainmodel Using MIP From line 50
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   supplychainmodel    OBJECTIVE  z
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  50
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE            12160.0000
+
+ RESOURCE USAGE, LIMIT          0.031 10000000000.000
+ ITERATION COUNT, LIMIT         0    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO setup time: 0.00s
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.1.0.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.01sec (det. 0.01 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Proven optimal solution
+MIP Solution:        12160.000000    (0 iterations, 0 nodes)
+Final Solve:         12160.000000    (0 iterations)
+
+Best possible:       12160.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU cost                .              .              .             1.0000      
+
+---- EQU eqn1  
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+NAmerica        12.0000        12.0000        12.0000       117.0000      
+SAmerica         8.0000         8.0000         8.0000        77.0000      
+
+---- EQU eqn2  
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+NAmerica        -INF             .              .           -36.0000      
+SAmerica        -INF             .              .              .          
+
+---- EQU eqn3  
+
+                         LOWER          LEVEL          UPPER         MARGINAL
+
+NAmerica.NAmerica          .            10.0000        +INF             .          
+NAmerica.SAmerica          .              .            +INF           51.0000      
+SAmerica.NAmerica          .             2.0000        +INF             .          
+SAmerica.SAmerica          .             8.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z                 -INF        12160.0000        +INF             .          
+
+---- VAR xij  quantity shipped from plant i to market j
+
+                         LOWER          LEVEL          UPPER         MARGINAL
+
+NAmerica.NAmerica        -INF           10.0000        +INF             .          
+NAmerica.SAmerica        -INF             .            +INF             .          
+SAmerica.NAmerica        -INF            2.0000        +INF             .          
+SAmerica.SAmerica        -INF            8.0000        +INF             .          
+
+---- VAR yi  plant i on or off
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+NAmerica          .             1.0000         1.0000      5640.0000      
+SAmerica          .             1.0000         1.0000      4500.0000      
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        0.094 SECONDS      4 MB  39.2.0 e0c5072f WEX-WEI
+
+
+USER: GAMS Demo license for TAWFIQ HAFIZI            G220605|0002CO-GEN
+      Military Institute, Bangladesh                           DL068940
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\tawfiq\Desktop\gams\others\test-sample-mini.gms
+Output     C:\Users\tawfiq\Desktop\gams\others\test-sample-mini.lst

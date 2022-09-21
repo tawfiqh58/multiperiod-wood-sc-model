@@ -1,0 +1,437 @@
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 08/22/22 00:00:43 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  Sets
+   2         a   supplier
+   3         / supplierA, supplierB /
+   4         b   wholesaler
+   5         / wholesalerA, wholesalerB /
+   6         e   customer
+   7         / retailerA, retailerB /
+   8         eb(e) retailer who takes service from b wholesaler
+   9         / retailerA, retailerB /
+  10         f   factory vehicle
+  11         / factoryVehicleA, factoryVehicleB /
+  12         g   wholesaler vehicle
+  13         / wholesalerVehicleA, wholesalerVehicleB /
+  14         Gb(b) vehicle in wholesaller b
+  15         / wholesalerA vahicleK, wholesalerB vehicleL /
+  16         i   available vehicles in collection centers that carry wooden waste from [retailer -> collection-center]
+  17         / vehicleA, vehicleB /
+  18         ix   available vehicles in collection centers servicing producer [collection-center -> producer|factory]
+  19         / vehicleC , vehicleD /
+  20         ixx   available vehicles in collection centers servicing producer (ixx belongs to ix)??
+  21         / vehicleC, vehicleD /
+  22         j   collection center
+  23         / collection-centerA, collection-centerB /
+  24         ij(i,j)  vehicle in collection center j carry waste from [customer -> collection-center]
+  25  *      one to many relationship page: 40 GAMS-user-guide
+  26         / (vehicleA,vehicleB).(collection-centerA,collection-centerB) /
+  27         hj(j) retailer who takes service from j collection center
+  28         / collection-centerA retailerA, collection-centerB retailerB /
+  29         m   raw material
+  30         / raw-materialA, raw-materialB /
+  31         p   product
+  32         / productA, productB /
+  33         t   time period of planning
+  34         / day1, day2 /
+  35         v   vehicle supplier
+  36         / vehicle-supplierA, vehicle-supplierB /
+  37         Va(a) vahicle in supplier
+  38  *      let: supplierA has vehicleI, supplierB has vehicleJ
+  39         / supplierA vehicleI vehicle2 vehicle3, supplierB vehicleJ /
+  40         Bapm(p,m) p product transform to m materia
+  41         / (productA,productB).(raw-materialA,raw-materialB) /
+  42         ixj(i,j) vehicle in collection center j carry waste from [collection-center -> factory]
+  43         / (vehicleA,vehicleB).(collection-centerA,collection-centerB) / ;
+  44   
+  45  * display ixj; shows "YES" value for each combination in a table
+  46  * that's mean if you don't give value to this denotation it will be "YES"
+  47  * display i; result: vahicleA,    vehicleB
+  48  * WHY i shows string and ixj show VALUE
+  49  * ANS: combinatin is just denotation but what is the value, each index has values
+  50   
+  51  * display Va; result: supplierA,    supplierB
+  52  * display Va(supplierA); ERROR: we can't access this way
+  53   
+  54  Parameters
+  55      Ta(a) time hour to go-and-come [supplier a -> factory]
+  56      / supplierA 10, supplierB 11 /
+  57   
+  58      Tx(b) time to go-and-come [factory -> holesaler b]
+  59      / wholesalerA 8, wholesalerB 9 /
+  60   
+  61      Txx(b,e) time to go-and-come [holesaler b -> retailer e]
+  62      / wholesalerA.retailerA 6
+  63        wholesalerA.retailerB 7
+  64        wholesalerB.retailerA 5
+  65        wholesalerB.retailerB 6 /
+  66   
+  67      ct(p) production cost per unit p in the factory
+  68      / productA 80, productB 90 /
+  69   
+  70      cs(b,f) fixd cost of sending vehicle [factory -> wholesaler b]
+  71  *   it should be g instead of f
+  72      / wholesalerA.factoryVehicleA 6
+  73        wholesalerA.factoryVehicleB 7
+  74        wholesalerB.factoryVehicleA 5
+  75        wholesalerB.factoryVehicleB 6 /
+  76   
+  77      cf(b,p) transportation cost per unit p [factory -> wholesaler b]
+  78  *   it should be g instead of f
+  79      / wholesalerA.productA 2
+  80        wholesalerA.productB 1
+  81        wholesalerB.productA 3
+  82        wholesalerB.productB 2 /
+  83   
+  84      cp  capacity of factory for raw material
+  85      / 350 /
+  86   
+  87      cpx  capacity of factory for product
+  88      / 250 /
+  89   
+  90      cpxx(b)  capacity of retailer b
+  91  *    maybe it will be e index
+  92      / wholesalerA 250
+  93        wholesalerB 235 /
+  94   
+  95      Alpha(m,p) consumption coefficient of material m in product p
+  96      / raw-materialA.productA 2
+  97        raw-materialA.productB 1
+  98        raw-materialB.productA 3
+  99        raw-materialB.productB 2 /
+ 100   
+ 101      Im(m)  volume of each material m
+ 102      /   raw-materialA    325
+ 103          raw-materialB    300  /
+ 104   
+ 105      Ip(p)  volume of each product m
+ 106      /   productA    325
+ 107          productB    300  /
+ 108   
+ 109      ch(m,t) maintainance cost of material m in factory on day t
+ 110      / raw-materialA.day1 20
+ 111        raw-materialA.day2 22
+ 112        raw-materialB.day1 21
+ 113        raw-materialB.day2 23 /
+ 114   
+ 115      cinv cost of environment destruction by cutting tree
+ 116      / 100 /
+ 117   
+ 118      Ts(e,j) time to go-and-come [customer e -> collection-center j]
+ 119      / retailerA.collection-centerA 3
+ 120        retailerA.collection-centerB 2
+ 121        retailerB.collection-centerA 2
+ 122        retailerB.collection-centerB 3 /
+ 123   
+ 124      Tsx(j) time to go-and-come [collection-center j -> factory]
+ 125      / collection-centerA 7
+ 126        collection-centerB 8 /
+ 127   
+ 128      LargeM large number
+ 129      / 10000000 /
+ 130   
+ 131      BigM very large number
+ 132      / 100000000000 /
+ 133   
+ 134      Hd work hours in day
+ 135      / 10 /
+ 136   
+ 137      ck(e,p) purchasing cost each product p from retailer e
+ 138  *   it says waste but denotes p
+ 139      / retailerA.productA 100
+ 140        retailerA.productB 120
+ 141        retailerB.productA 110
+ 142        retailerB.productB 130 /
+ 143   
+ 144      fx(ix,j) fixed const sending vehicle ix from [collection-center j -> factory]
+ 145      / vehicleC.collection-centerA 30
+ 146        vehicleC.collection-centerB 20
+ 147        vehicleD.collection-centerA 20
+ 148        vehicleD.collection-centerB 30 /
+ 149   
+ 150      czx(j,m) transportation cost unit of wooden waste m from [collection-center j -> factory]
+ 151      / collection-centerA.raw-materialA 7
+ 152        collection-centerA.raw-materialB 8
+ 153        collection-centerB.raw-materialA 6
+ 154        collection-centerB.raw-materialB 7 /
+ 155   
+ 156      Sp(i)  capacity of vehicle i
+ 157      /   vehicleA    80
+ 158          vehicleB    90  /
+ 159   
+ 160      chx(p,t)  maintainance cost unit product p in factory on day t
+ 161      /   productA.day1    5
+ 162          productA.day2    3
+ 163          productB.day1    4
+ 164          productB.day2    2 /
+ 165   
+ 166      Spx(ix)  capacity of vehicle i
+ 167  *   sir told me that it's not necessary. I can remove this index.
+ 168  *   so don't use Spx in equations
+ 169      /   vehicleC    80
+ 170          vehicleD    90  /
+ 171   
+ 172      cab(j) storage capacity of collection-center j
+ 173      / collection-centerA 120
+ 174        collection-centerB 110 /
+ 175   
+ 176      BRpe(p,e)  volume of each material m
+ 177      /   productA.retailerA    325
+ 178          productA.retailerB    300
+ 179          productB.retailerB    305
+ 180          productB.retailerA    275 /
+ 181   
+ 182      Cinvx benifit of environment enhancement for each tree
+ 183      / 10 /
+ 184   
+ 185      cma(m,a) cost of purchasing unit wooden raw material m form [supplier a -> factory]
+ 186      / raw-materialA.supplierA 15
+ 187        raw-materialA.supplierB 16
+ 188        raw-materialB.supplierA 16
+ 189        raw-materialB.supplierB 17 /
+ 190   
+ 191      cx(a,v) fixed cost sending vehicle v form [supplier a -> factory]
+ 192      / supplierA.vehicle-supplierA 10
+ 193        supplierA.vehicle-supplierB 12
+ 194        supplierB.vehicle-supplierA 12
+ 195        supplierB.vehicle-supplierB 13 /
+ 196   
+ 197      cxx(m,a) transportation cost unit wooden raw material m form [supplier a -> factory]
+ 198      / raw-materialA.supplierA 2
+ 199        raw-materialA.supplierB 1
+ 200        raw-materialB.supplierA 1
+ 201        raw-materialB.supplierB 3 /
+ 202   
+ 203      Vol(v)  capacity of vehicle v
+ 204      /   vehicle-supplierA    70
+ 205          vehicle-supplierB    80  /
+ 206   
+ 207      Volx(f)  capacity of vehicle f
+ 208      /   factoryVehicleA    75
+ 209          factoryVehicleB    85  /
+ 210   
+ 211      Volxx(g)  capacity of vehicle g
+ 212      /   wholesalerVehicleA    40
+ 213          wholesalerVehicleB    20  /
+ 214  ;
+ 215   
+ 216  table cr(b,e,g) fixed cost sending vehicle g from wholesaler b to customer e
+ 217                         wholesalerVehicleA   wholesalerVehicleB
+ 218  wholesalerA.retailerA           20                  18
+ 219  wholesalerA.retailerB           19                  17
+ 220  wholesalerB.retailerA           21                  19
+ 221  wholesalerB.retailerB           20                  18 ;
+ 222   
+ 223  table cd(b,e,p) transportation cost per unit p from [wholesaler b -> retailer e]
+ 224                               productA            productB
+ 225  wholesalerA.retailerA           20                  18
+ 226  wholesalerA.retailerB           19                  17
+ 227  wholesalerB.retailerA           21                  19
+ 228  wholesalerB.retailerB           20                  18 ;
+ 229   
+ 230  table dem(e,p,t) demand customer e product p on day t
+ 231                              day1                day2
+ 232  retailerA.productA           20                  18
+ 233  retailerB.productA           19                  17
+ 234  retailerA.productB           21                  19
+ 235  retailerB.productB           20                  18 ;
+ 236   
+ 237  table Pept(e,p,t) penalty of shortage of product p for retailer e on day t
+ 238                              day1                day2
+ 239  retailerA.productA           5                   8
+ 240  retailerB.productA           4                   7
+ 241  retailerA.productB           3                   9
+ 242  retailerB.productB           6                   8 ;
+ 243   
+ 244  table feij(e,i,j) fxd transportation cost of vehicle i from [customer e -> collection-center j]
+ 245                       collection-centerA    collection-centerB
+ 246  retailerA.vehicleA           20                    18
+ 247  retailerA.vehicleB           19                    17
+ 248  retailerB.vehicleA           21                    19
+ 249  retailerB.vehicleB           20                    18 ;
+ 250   
+ 251  table cz(e,j,p) transportation cost of each wooden waste m [collection-center j -> factory]
+ 252  * it should be waste
+ 253                                  productA  productB
+ 254  retailerA.collection-centerA        3         4
+ 255  retailerA.collection-centerB        2         5
+ 256  retailerB.collection-centerA        2         6
+ 257  retailerB.collection-centerB        3         5 ;
+ 258   
+ 259  table chxx(b,p,t) maintainance cost of each product p for wholesaler b on day t
+ 260                                day1                day2
+ 261  wholesalerA.productA           5                   8
+ 262  wholesalerB.productA           4                   7
+ 263  wholesalerA.productB           3                   9
+ 264  wholesalerB.productB           6                   8 ;
+ 265   
+ 266  table chxxx(e,p,t) maintainance cost of each product p for retailer e on day t
+ 267                              day1               day2
+ 268  retailerA.productA           2                  4
+ 269  retailerB.productA           3                  3
+ 270  retailerA.productB           1                  4
+ 271  retailerB.productB           3                  2 ;
+ 272   
+ 273  free variables
+ 274       z
+ 275  ;
+ 276   
+ 277  Variables
+ 278       w(a,v,t)
+ 279       wx(b,f,t)
+ 280       wxx(b,e,g,t)
+ 281       yxxx(b,e,g,p,t) number of product p transported by vehicle g from wholesaller b to retailer e on day t
+ 282  *    bo(k,p,t) k not init
+ 283       bo(e,p,t)
+ 284  *    ux(m,(t-1)) not working
+ 285       ux(m,t)
+ 286       u_pt(p,t)
+ 287       uxx(b,p,t)
+ 288  *    uxxx(e,p,(t-1)) not working
+ 289       uxxx(e,p,t)      storage inventory or customer e from product p on day t
+ 290       wb(e,i,j,t)
+ 291       wbx(ix,j,t)
+ 292       yb(e,i,j,p,t)    amount of p product sent retailer e to collection-center j on day t using vehicle i
+ 293       ybx(ix,j,m,t)
+ 294       yavmt(a,v,m,t)   m material sent by v vahicle from a supplier to the factory on t day
+ 295       yx(p,t)
+ 296       yxx(b,g,p,t)
+ 297  ;
+ 298   
+ 299  binary variables
+ 300       xavt(a,v,t)
+ 301       xx(b,f,t)
+ 302       xxx(b,e,g,t)
+ 303       xb(e,i,j,t)
+ 304       xbx(ix,j,t)
+ 305  ;
+ 306   
+ 307  Positive variables x ;
+ 308   
+ 309  Equations
+ 310       cost        define objective function
+ 311       eqn1(e,p,t) product supply equation
+ 312       eqn2(m,j,t)
+ 313       eqn3(t)
+ 314       eqn4(t)
+ 315       eqn5(b,t)
+ 316       eqn6(t,m)
+ 317  *    eqn7 v belongs to Va
+ 318       eqn7(a,v,t)
+ 319       eqn8(f,t)
+ 320  *    eqn9 g belongs to Gb
+ 321       eqn9(b,g,t)
+ 322       eqn10(b,f,t)
+ 323  *    eqn11 e belongs to Eb, g belongs to Gb
+ 324       eqn11(b,e,g,t)
+ 325       eqn12(p,t)
+ 326       eqn13(b,p,t)
+ 327       eqn14(e,p,t)
+ 328  *    eqn15 i belongs to ixj
+ 329       eqn15(e,i,j,t)
+ 330  *    eqn16 ixx belongs to ixj
+ 331       eqn16(ix,j,t)
+ 332  *    eqn17 i belongs to ixj
+ 333       eqn17(i,j,t)
+ 334  *    eqn18 ixx belongs to ixj
+ 335       eqn18(ix,j,t)
+ 336  *    eqn19 i belongs to ixj, e belongs to hj
+ 337       eqn19(j,i,e,t)
+ 338       eqn20(t,m)
+ 339  *    eqn21 v belongs to Va
+ 340       eqn21(a,v,t)
+ 341  *    eqn22 g belongs to Ga
+ 342       eqn22(b,f,g,t)
+ 343  *    eqn23 e belongs to eb, g belongs to Ga
+ 344       eqn23(b,e,g,t)
+ 345  ;
+ 346   
+ 347  * c = cma
+ 348  * y = yavmt
+ 349  * x = xavt
+ 350  * i" = ix because of sir told me
+ 351  * u' = u_pt
+ 352  * I'p = Ip
+ 353  cost..        z  =e=  (sum(a,sum(v,sum(m,sum(t,cma(m,a)*yavmt(a,v,m,t)))))) + (sum(a,sum(v,sum(t,cx(a,v)*xavt(a,v,t))))+sum(a,sum(v,sum(m,sum(t,cxx(m,a)*yavmt(a,v,m,t)))))) +
+ 354  (sum(p,sum(t,ct(p)*yx(p,t)))) + (sum(b,sum(f,sum(t,cs(b,f)*xx(b,f,t))))+ sum(b,sum(g,sum(p,sum(t,cf(b,p)*yxx(b,g,p,t)))))) +
+ 355  (sum(b,sum(e,sum(g,sum(t,cr(b,e,g)*xxx(b,e,g,t)))))+sum(b,sum(e,sum(g,sum(p,sum(t,cd(b,e,p)*yxxx(b,e,g,p,t))))))) +
+ 356  (sum(m,sum(t,ch(m,t)*ux(m,t))) + sum(p,sum(t,chx(p,t)*u_pt(p,t))) + sum(b,sum(p,sum(t,chxx(b,p,t)*uxx(b,p,t)))) + sum(e,sum(p,sum(t,chxxx(e,p,t)*uxxx(e,p,t))))) +
+ 357  sum(e,sum(p,sum(t,Pept(e,p,t)*bo(e,p,t)))) + (Cinv*sum(a,sum(v,sum(m,sum(t,yavmt(a,v,m,t)))))) + (sum(e,sum(i,sum(j,sum(p,sum(t,ck(e,p)*yb(e,i,j,p,t))))))) +
+ 358  (sum(e,sum(j,sum(i,sum(t,feij(e,i,j)*xb(e,i,j,t))))) + sum(e,sum(j,sum(i,sum(p,sum(t,cz(e,j,p)*yb(e,i,j,p,t))))))) +
+ 359  (sum(j,sum(ix,sum(t,fx(ix,j)*xbx(ix,j,t)))) + sum(j,sum(ix,sum(m,sum(t,czx(j,m)*ybx(ix,j,m,t))))) - (Cinvx*sum(j,sum(ix,sum(m,sum(t,ybx(ix,j,m,t)))))));
+ 360  * eqn1(e,p,t)..  (sum(b,sum(g, xxxxy(b,e,g,p,t))) + xxxu(e,p,(t-1)) - xxxu(e,p,t)) * BRpe(p,e) =e= sum(j,sum(i,yb(e,i,j,p,t))) ;
+ 361  * eqn1(e,p,t)..  (sum(b,sum(g, xxxxy(b,e,g,p,t))) + xxxu(e,p,"(t-1)") - xxxu(e,p,t)) * BRpe(p,e) =e= sum(j,sum(i,yb(e,i,j,p,t))) ;
+ 362  * (t-1) not working
+ 363  * how to write (t-1)
+ 364  eqn1(e,p,t)..  (sum(b,sum(g, yxxx(b,e,g,p,t))) + uxxx(e,p,t) - uxxx(e,p,t)) * BRpe(p,e) =e= sum(j,sum(i,yb(e,i,j,p,t))) ;
+ 365   
+ 366  * sum upper limit do not matches as I simply decleared in the above eqn1
+ 367  * sum(i tolongs to ixj, _)
+ 368  * sum(g tolongs to Gb, _)
+ 369  * TODO: ADD more Constraints..
+ 370   
+ 371  eqn2(m,j,t).. sum(e,sum(i,sum(p,Alpha(m,p)*yb(e,i,j,p,t)))) =e= sum(ix,ybx(ix,j,m,t));
+ 372  eqn3(t).. sum(m,Im(m)*ux(m,t)) =l= cp;
+ 373  eqn4(t).. sum(p,Ip(p)*u_pt(p,t)) =l= cpx;
+ 374  eqn5(b,t).. sum(p,Ip(p)*uxx(b,p,t)) =l=cpxx(b);
+ 375  eqn6(t,m).. sum(a,sum(v,yavmt(a,v,m,t))) + ux(m,t) =e= sum(p,Alpha(m,p)*yx(p,t)) + ux(m,t);
+ 376  eqn7(a,v,t).. w(a,v,t)*Ta(a) =l= Hd*xavt(a,v,t);
+ 377  eqn8(f,t).. sum(b,wx(b,f,t)*Tx(b)) =l= Hd;
+ 378  eqn9(b,g,t).. sum(e,wxx(b,e,g,t)*Txx(b,e)) =l= Hd;
+ 379  eqn10(b,f,t).. wx(b,f,t) =l= LargeM*xx(b,f,t);
+ 380  eqn11(b,e,g,t).. wxx(b,e,g,t) =l= BigM*xxx(b,e,g,t);
+ 381  eqn12(p,t).. yx(p,t) + u_pt(p,t) =e= sum(b,sum(g,yxx(b,g,p,t))) + u_pt(p,t);
+ 382  eqn13(b,p,t).. sum(g,yxx(b,g,p,t)) + uxx(b,p,t) =e= sum(e,sum(g,yxxx(b,e,g,p,t))) + uxx(b,p,t);
+ 383  eqn14(e,p,t).. sum(b,sum(g,yxxx(b,e,g,p,t))) + uxxx(e,p,t) + bo(e,p,t) =e= dem(e,p,t) + uxxx(e,p,t);
+ 384  eqn15(e,i,j,t).. sum(p,Ip(p)*yb(e,i,j,p,t)) =l= Sp(i)*wb(e,i,j,t);
+ 385  eqn16(ix,j,t).. sum(m,Im(m)*ybx(ix,j,m,t)) =l= Spx(ix)*wbx(ix,j,t);
+ 386  eqn17(i,j,t).. sum(e,wb(e,i,j,t)*Ts(e,j)) =l= Hd;
+ 387  eqn18(ix,j,t).. wbx(ix,j,t)*Tsx(j) =l= Hd*xbx(ix,j,t);
+ 388  eqn19(j,i,e,t).. wb(e,i,j,t) =l= LargeM*xb(e,i,j,t);
+ 389  eqn20(t,m).. sum(a,sum(v,yavmt(a,v,m,t))) + sum(j,sum(ix,ybx(ix,j,m,t))) + ux(m,t) =e= sum(p,Alpha(m,p)*yx(p,t)) + ux(m,t);
+ 390  eqn21(a,v,t).. sum(m,Im(m)*yavmt(a,v,m,t)) =l= Vol(v)*w(a,v,t);
+ 391  eqn22(b,f,g,t).. sum(p,Ip(p)*yxx(b,g,p,t)) =l= volx(f)*wx(b,f,t);
+ 392  eqn23(b,e,g,t).. sum(p,Ip(p)*yxxx(b,e,g,p,t)) =l= volxx(g)*wxx(b,e,g,t);
+ 393   
+ 394   
+ 395  Model thesisSolve /all/ ;
+ 396   
+ 397  Solve thesisSolve using LP minimizing z ;
+****                                          $65,256
+****  65  Discrete variables can only appear in MIP, RMIP, MINLP
+****        RMINLP MIQCP or RMIQCP MPEC RMPEC problems.
+**** 256  Error(s) in analyzing solve statement.
+**** The following LP errors were detected in model thesisSolve:
+****  65 equation cost.. discrete variable "xavt" not allowed
+****  65 equation cost.. discrete variable "xx" not allowed
+****  65 equation cost.. discrete variable "xxx" not allowed
+****  65 equation cost.. discrete variable "xb" not allowed
+****  65 equation cost.. discrete variable "xbx" not allowed
+****  65 equation eqn7.. discrete variable "xavt" not allowed
+****  65 equation eqn10.. discrete variable "xx" not allowed
+****  65 equation eqn11.. discrete variable "xxx" not allowed
+****  65 equation eqn18.. discrete variable "xbx" not allowed
+****  65 equation eqn19.. discrete variable "xb" not allowed
+ 398   
+ 399  * Result:
+ 400  display z.l,z.m;
+
+**** 2 ERROR(S)   0 WARNING(S)
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  39.2.0 e0c5072f WEX-WEI
+
+
+USER: GAMS Demo license for TAWFIQ HAFIZI            G220605|0002CO-GEN
+      Military Institute, Bangladesh                           DL068940
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\tawfiq\Desktop\THESIS\gams\backup\thesis_mip_showing_result-edit.gms
+Output     C:\Users\tawfiq\Desktop\THESIS\gams\backup\thesis_mip_showing_result-edit.lst
+
+**** USER ERROR(S) ENCOUNTERED

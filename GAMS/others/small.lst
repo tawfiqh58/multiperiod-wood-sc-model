@@ -1,0 +1,1895 @@
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 11:09:12 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  Sets
+   2         n plant i
+   3         / NAmerica, SAmerica /
+   4   
+   5         a   supplier
+   6         / supplierA, supplierB /
+   7         b   wholesaler
+   8         / wholesalerA, wholesalerB /
+   9         e   customer
+  10         / retailerA, retailerB /
+  11         eb(e) retailer who takes service from b wholesaler
+  12         / retailerA wholesalerA wholesalerB, retailerB wholesalerB /
+  13         f   factory vehicle
+  14         / factoryVehicleA, factoryVehicleB /
+  15         g   wholesaler vehicle
+  16         / wholesalerVehicleA, wholesalerVehicleB /
+  17         Gb(b) vehicle in wholesaller b
+  18         / wholesalerA vahicleK, wholesalerB vehicleL /
+  19         i   available vehicles in collection centers that carry wooden waste from [retailer -> collection-center]
+  20         / vehicleA, vehicleB /
+  21         ix   available vehicles in collection centers servicing producer [collection-center -> producer|factory]
+  22         / vehicleC , vehicleD /
+  23         ixx   available vehicles in collection centers servicing producer (ixx belongs to ix)??
+  24         / vehicleC, vehicleD /
+  25         j   collection center
+  26         / collection-centerA, collection-centerB /
+  27         ij(i,j)  vehicle in collection center j carry waste from [customer -> collection-center]
+  28  *      one to many relationship pageno:40 (GAMS-user-guide)
+  29         / (vehicleA,vehicleB).(collection-centerA,collection-centerB) /
+  30         hj(j) retailer who takes service from j collection center
+  31         / collection-centerA retailerA, collection-centerB retailerB /
+  32         m   raw material
+  33         / raw-materialA, raw-materialB /
+  34         p   product
+  35         / productA, productB /
+  36         t   time period of planning
+  37         / day1, day2 /
+  38         v   vehicle supplier
+  39         / vehicle-supplierA, vehicle-supplierB /
+  40         Va(a) vahicle in supplier
+  41  *      let: supplierA has vehicleI, supplierB has vehicleJ
+  42         / supplierA vehicleI vehicle2 vehicle3, supplierB vehicleJ /
+  43         Bapm(p,m) p product transform to m materia
+  44         / (productA,productB).(raw-materialA,raw-materialB) /
+  45         ixj(i,j) vehicle in collection center j carry waste from [collection-center -> factory]
+  46         / (vehicleA,vehicleB).(collection-centerA,collection-centerB) / ;
+  47  ;
+  48   
+  49  Parameter
+  50         Dj(m) demand from market j
+  51         / raw-materialA 12, raw-materialB 8 /
+  52         Ki(n) capacity of plant i
+  53         / NAmerica 10, SAmerica 10 /
+  54         fi(n) fixed cost of plant i
+  55         / NAmerica 6000, SAmerica 4500 /
+  56   
+  57      Ta(a) time hour to go-and-come [supplier a -> factory]
+  58      / supplierA 104, supplierB 112 /
+  59   
+  60      Tx(b) time to go-and-come [factory -> wholesaler b]
+  61      / wholesalerA 2358, wholesalerB 3239 /
+  62   
+  63      Txx(b,e) time to go-and-come [holesaler b -> retailer e]
+  64      / wholesalerA.retailerA 326
+  65        wholesalerA.retailerB 27
+  66        wholesalerB.retailerA 54
+  67        wholesalerB.retailerB 56 /
+  68   
+  69      ct(p) production cost per unit p in the factory
+  70      / productA 805, productB 9023 /
+  71   
+  72      cs(b,f) fixd cost of sending vehicle [factory -> wholesaler b]
+  73  *   it should be g instead of f
+  74      / wholesalerA.factoryVehicleA 62
+  75        wholesalerA.factoryVehicleB 75
+  76        wholesalerB.factoryVehicleA 5
+  77        wholesalerB.factoryVehicleB 6 /
+  78   
+  79      cf(b,p) transportation cost per unit p [factory -> wholesaler b]
+  80  *   it should be g instead of f
+  81      / wholesalerA.productA 223
+  82        wholesalerA.productB 123
+  83        wholesalerB.productA 33
+  84        wholesalerB.productB 42 /
+  85   
+  86      cp  capacity of factory for raw material
+  87      / 350534 /
+  88   
+  89      cpx  capacity of factory for product
+  90      / 250324 /
+  91   
+  92      cpxx(b)  capacity of retailer b
+  93  *    maybe it will be e index
+  94      / wholesalerA 25023
+  95        wholesalerB 23235 /
+  96   
+  97      Alpha(m,p) consumption coefficient of material m in product p
+  98      / raw-materialA.productA 21
+  99        raw-materialA.productB 12
+ 100        raw-materialB.productA 233
+ 101        raw-materialB.productB 232 /
+ 102   
+ 103      Im(m)  volume of each material m
+ 104      /   raw-materialA    325
+ 105          raw-materialB    300  /
+ 106   
+ 107      Ip(p)  volume of each product m
+ 108      /   productA    325
+ 109          productB    300  /
+ 110   
+ 111      ch(m,t) maintainance cost of material m in factory on day t
+ 112      / raw-materialA.day1 20
+ 113        raw-materialA.day2 22
+ 114        raw-materialB.day1 21
+ 115        raw-materialB.day2 23 /
+ 116   
+ 117      cinv cost of environment destruction by cutting tree
+ 118      / 100 /
+ 119   
+ 120      Ts(e,j) time to go-and-come [customer e -> collection-center j]
+ 121      / retailerA.collection-centerA 3
+ 122        retailerA.collection-centerB 2
+ 123        retailerB.collection-centerA 2
+ 124        retailerB.collection-centerB 3 /
+ 125   
+ 126      Tsx(j) time to go-and-come [collection-center j -> factory]
+ 127      / collection-centerA 7
+ 128        collection-centerB 8 /
+ 129   
+ 130      LargeM large number
+ 131      / 10000000 /
+ 132   
+ 133      BigM very large number
+ 134      / 100000000000 /
+ 135   
+ 136      Hd work hours in day
+ 137      / 10 /
+ 138   
+ 139      ck(e,p) purchasing cost each product p from retailer e
+ 140  *   it says waste but denotes p
+ 141      / retailerA.productA 100
+ 142        retailerA.productB 120
+ 143        retailerB.productA 110
+ 144        retailerB.productB 130 /
+ 145   
+ 146      fx(ix,j) fixed const sending vehicle ix from [collection-center j -> factory]
+ 147      / vehicleC.collection-centerA 30
+ 148        vehicleC.collection-centerB 20
+ 149        vehicleD.collection-centerA 20
+ 150        vehicleD.collection-centerB 30 /
+ 151   
+ 152      czx(j,m) transportation cost unit of wooden waste m from [collection-center j -> factory]
+ 153      / collection-centerA.raw-materialA 7
+ 154        collection-centerA.raw-materialB 8
+ 155        collection-centerB.raw-materialA 6
+ 156        collection-centerB.raw-materialB 7 /
+ 157   
+ 158      Sp(i)  capacity of vehicle i
+ 159      /   vehicleA    80
+ 160          vehicleB    90  /
+ 161   
+ 162      chx(p,t)  maintainance cost unit product p in factory on day t
+ 163      /   productA.day1    5
+ 164          productA.day2    3
+ 165          productB.day1    4
+ 166          productB.day2    2 /
+ 167   
+ 168      Spx(ix)  capacity of vehicle i
+ 169  *   sir told me that it's not necessary. I can remove this index.
+ 170  *   so don't use Spx in equations
+ 171      /   vehicleC    80
+ 172          vehicleD    90  /
+ 173   
+ 174      cab(j) storage capacity of collection-center j
+ 175      / collection-centerA 120
+ 176        collection-centerB 110 /
+ 177   
+ 178      BRpe(p,e)  volume of each material m
+ 179      /   productA.retailerA    325
+ 180          productA.retailerB    300
+ 181          productB.retailerB    305
+ 182          productB.retailerA    275 /
+ 183   
+ 184      Cinvx benifit of environment enhancement for each tree
+ 185      / 10 /
+ 186   
+ 187      c(m,a) cost of purchasing unit wooden raw material m form [supplier a -> factory]
+ 188      / raw-materialA.supplierA 15
+ 189        raw-materialA.supplierB 16
+ 190        raw-materialB.supplierA 16
+ 191        raw-materialB.supplierB 17 /
+ 192   
+ 193      cx(a,v) fixed cost sending vehicle v form [supplier a -> factory]
+ 194      / supplierA.vehicle-supplierA 10
+ 195        supplierA.vehicle-supplierB 12
+ 196        supplierB.vehicle-supplierA 12
+ 197        supplierB.vehicle-supplierB 13 /
+ 198   
+ 199      cxx(m,a) transportation cost unit wooden raw material m form [supplier a -> factory]
+ 200      / raw-materialA.supplierA 2
+ 201        raw-materialA.supplierB 1
+ 202        raw-materialB.supplierA 1
+ 203        raw-materialB.supplierB 3 /
+ 204   
+ 205      Vol(v)  capacity of vehicle v
+ 206      /   vehicle-supplierA    70
+ 207          vehicle-supplierB    80  /
+ 208   
+ 209      Volx(f)  capacity of vehicle f
+ 210      /   factoryVehicleA    75
+ 211          factoryVehicleB    85  /
+ 212   
+ 213      Volxx(g)  capacity of vehicle g
+ 214      /   wholesalerVehicleA    40
+ 215          wholesalerVehicleB    20  /
+ 216  ;
+ 217   
+ 218   
+ 219  table cij(n,m) wholesaler vehicle
+ 220                      raw-materialA   raw-materialB
+ 221          NAmerica       81                  92
+ 222          SAmerica      117                  77
+ 223  ;
+ 224   
+ 225  table cr(b,e,g) fixed cost sending vehicle g from wholesaler b to customer e
+ 226                         wholesalerVehicleA   wholesalerVehicleB
+ 227  wholesalerA.retailerA           20                  18
+ 228  wholesalerA.retailerB           19                  17
+ 229  wholesalerB.retailerA           21                  19
+ 230  wholesalerB.retailerB           20                  18 ;
+ 231   
+ 232  table cd(b,e,p) transportation cost per unit p from [wholesaler b -> retailer e]
+ 233                               productA            productB
+ 234  wholesalerA.retailerA           20                  18
+ 235  wholesalerA.retailerB           19                  17
+ 236  wholesalerB.retailerA           21                  19
+ 237  wholesalerB.retailerB           20                  18 ;
+ 238   
+ 239  table dem(e,p,t) demand customer e product p on day t
+ 240                              day1                day2
+ 241  retailerA.productA           20                  18
+ 242  retailerB.productA           19                  17
+ 243  retailerA.productB           21                  19
+ 244  retailerB.productB           20                  18 ;
+ 245   
+ 246  table Pept(e,p,t) penalty of shortage of product p for retailer e on day t
+ 247                              day1                day2
+ 248  retailerA.productA           5                   8
+ 249  retailerB.productA           4                   7
+ 250  retailerA.productB           3                   9
+ 251  retailerB.productB           6                   8 ;
+ 252   
+ 253  table feij(e,i,j) fxd transportation cost of vehicle i from [customer e -> collection-center j]
+ 254                       collection-centerA    collection-centerB
+ 255  retailerA.vehicleA           20                    18
+ 256  retailerA.vehicleB           19                    17
+ 257  retailerB.vehicleA           21                    19
+ 258  retailerB.vehicleB           20                    18 ;
+ 259   
+ 260  table cz(e,j,p) transportation cost of each wooden waste m [collection-center j -> factory]
+ 261  * it should be waste
+ 262                                  productA  productB
+ 263  retailerA.collection-centerA        3         4
+ 264  retailerA.collection-centerB        2         5
+ 265  retailerB.collection-centerA        2         6
+ 266  retailerB.collection-centerB        3         5 ;
+ 267   
+ 268  table chxx(b,p,t) maintainance cost of each product p for wholesaler b on day t
+ 269                                day1                day2
+ 270  wholesalerA.productA           5                   8
+ 271  wholesalerB.productA           4                   7
+ 272  wholesalerA.productB           3                   9
+ 273  wholesalerB.productB           6                   8 ;
+ 274   
+ 275  table chxxx(e,p,t) maintainance cost of each product p for retailer e on day t
+ 276                              day1               day2
+ 277  retailerA.productA           2                  4
+ 278  retailerB.productA           3                  3
+ 279  retailerA.productB           1                  4
+ 280  retailerB.productB           3                  2 ;
+ 281   
+ 282  free variables
+ 283       z;
+ 284   
+ 285  Positive Variables
+ 286   
+ 287       xij(n,m) quantity shipped from plant i to market j
+ 288       w(a,v,t)
+ 289       w1(b,f,t)
+ 290       w11(b,e,g,t)
+ 291       y111(b,e,g,p,t) number of product p transported by vehicle g from wholesaller b to retailer e on day t
+ 292  *    bo(k,p,t) k not init
+ 293       bo(e,p,t)
+ 294  *    ux(m,(t-1)) not working
+ 295       u1(m,t)
+ 296       u_pt(p,t)
+ 297       u11(b,p,t)
+ 298  *    uxxx(e,p,(t-1)) not working
+ 299       u111(e,p,t)      storage inventory or customer e from product p on day t
+ 300       wb(e,i,j,t)
+ 301       wb1(ix,j,t)
+ 302       yb(e,i,j,p,t)    amount of p product sent retailer e to collection-center j on day t using vehicle i
+ 303       yb1(ix,j,m,t)
+ 304       y(a,v,m,t)   m material sent by v vahicle from a supplier to the factory on t day
+ 305       y1(p,t)
+ 306       y11(b,g,p,t)
+ 307  ;
+ 308   
+ 309  binary variables
+ 310       yi(n) plant i on or off
+ 311       x(a,v,t)
+ 312       x1(b,f,t)
+ 313       x11(b,e,g,t)
+ 314       xb(e,i,j,t)
+ 315       xb1(ix,j,t);
+ 316   
+ 317   
+ 318  Equations
+ 319       cost
+ 320       eqn1(m)
+ 321   
+ 322   
+ 323  *     eqn2(m,j,t)
+ 324       eqn2(n)
+ 325   
+ 326       eqn3(n,m)
+ 327  *     eqn3(t) # Problem is integer infeasible
+ 328   
+ 329       eqn4(t)
+ 330       eqn5(b,t)
+ 331       eqn6(t,m)
+ 332   
+ 333       eqn7(a,v,t)
+ 334       eqn8(f,t)
+ 335  *    eqn9 g belongs to Gb
+ 336       eqn9(b,g,t)
+ 337       eqn10(b,f,t)
+ 338  *    eqn11 e belongs to Eb, g belongs to Gb
+ 339       eqn11(b,e,g,t)
+ 340       eqn12(p,t)
+ 341       eqn13(b,p,t)
+ 342       eqn14(e,p,t)
+ 343  *    eqn15 i belongs to i'j
+ 344       eqn15(e,i,j,t)
+ 345  *    eqn16 i" belongs to i'j
+ 346       eqn16(ix,j,t)
+ 347  *    eqn17 i belongs to i'j
+ 348       eqn17(i,j,t)
+ 349  *    eqn18 i" belongs to i'j
+ 350       eqn18(ix,j,t)
+ 351  *    eqn19 i belongs to i'j, e belongs to hj
+ 352       eqn19(j,i,e,t)
+ 353       eqn20(t,m)
+ 354  *    eqn21 v belongs to Va
+ 355       eqn21(a,v,t)
+ 356  *    eqn22 g belongs to Ga
+ 357       eqn22(b,f,g,t)
+ 358  *    eqn23 e belongs to eb, g belongs to Ga
+ 359       eqn23(b,e,g,t);
+ 360   
+ 361   
+ 362  cost..    z  =e=  sum(n,fi(n)*yi(n)) + sum(n,sum(m,cij(n,m)*xij(n,m)));
+ 363  * FAKE
+ 364  eqn1(m).. sum(n,xij(n,m)) =e= Dj(m);
+ 365  *eqn2(m,j,t).. sum(e,sum(i,sum(p,Alpha(m,p)*yb(e,i,j,p,t)))) =e= sum(ix,yb1(ix,j,m,t));
+ 366  eqn2(n).. sum(m,xij(n,m)) =l= Ki(n)*yi(n);
+ 367   
+ 368  * FAKE
+ 369  eqn3(n,m).. xij(n,m) =g= 0;
+ 370  * # Problem is integer infeasible
+ 371  * eqn3(t).. sum(m,Im(m)*u1(m,t)) =l= cp;
+ 372   
+ 373   
+ 374  eqn4(t).. sum(p,Ip(p)*u_pt(p,t)) =l= cpx;
+ 375  eqn5(b,t).. sum(p,Ip(p)*u11(b,p,t)) =l=cpxx(b);
+ 376  eqn6(t,m).. sum(a,sum(v,y(a,v,m,t))) + u1(m,t-1) =e= sum(p,Alpha(m,p)*y1(p,t)) + u1(m,t);
+ 377  eqn7(a,v,t).. w(a,v,t)*Ta(a) =l= Hd*x(a,v,t);
+ 378  eqn8(f,t).. sum(b,w1(b,f,t)*Tx(b)) =l= Hd;
+ 379  eqn9(b,g,t).. sum(e,w11(b,e,g,t)*Txx(b,e)) =l= Hd;
+ 380  eqn10(b,f,t).. w1(b,f,t) =l= LargeM*x1(b,f,t);
+ 381  eqn11(b,e,g,t).. w11(b,e,g,t) =l= BigM*x11(b,e,g,t);
+ 382  eqn12(p,t).. y1(p,t) + u_pt(p,t-1) =e= sum(b,sum(g,y11(b,g,p,t))) + u_pt(p,t);
+ 383  eqn13(b,p,t).. sum(g,y11(b,g,p,t)) + u11(b,p,t-1) =e= sum(e,sum(g,y111(b,e,g,p,t))) + u11(b,p,t);
+ 384  eqn14(e,p,t).. sum(b,sum(g,y111(b,e,g,p,t))) + u111(e,p,t-1) + bo(e,p,t) =e= dem(e,p,t) + u111(e,p,t);
+ 385  eqn15(e,i,j,t).. sum(p,Ip(p)*yb(e,i,j,p,t)) =l= Sp(i)*wb(e,i,j,t);
+ 386  eqn16(ix,j,t).. sum(m,Im(m)*yb1(ix,j,m,t)) =l= Spx(ix)*wb1(ix,j,t);
+ 387  eqn17(i,j,t).. sum(e,wb(e,i,j,t)*Ts(e,j)) =l= Hd;
+ 388  eqn18(ix,j,t).. wb1(ix,j,t)*Tsx(j) =l= Hd*xb1(ix,j,t);
+ 389  eqn19(j,i,e,t).. wb(e,i,j,t) =l= LargeM*xb(e,i,j,t);
+ 390  eqn20(t,m).. sum(a,sum(v,y(a,v,m,t))) + sum(j,sum(ix,yb1(ix,j,m,t))) + u1(m,t-1) =e= sum(p,Alpha(m,p)*y1(p,t)) + u1(m,t);
+ 391  eqn21(a,v,t).. sum(m,Im(m)*y(a,v,m,t)) =l= Vol(v)*w(a,v,t);
+ 392  eqn22(b,f,g,t).. sum(p,Ip(p)*y11(b,g,p,t)) =l= volx(f)*w1(b,f,t);
+ 393  eqn23(b,e,g,t).. sum(p,Ip(p)*y111(b,e,g,p,t)) =l= volxx(g)*w11(b,e,g,t);
+ 394   
+ 395  Model supplychainmodel /all/ ;
+ 396   
+ 397  Solve supplychainmodel using MIP minimizing z ;
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  39.2.0 e0c5072f WEX-WEI
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 11:09:12 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE supplychainmodel Using MIP From line 397
+
+
+---- cost  =E=  
+
+cost..  z - 81*xij(NAmerica,raw-materialA) - 92*xij(NAmerica,raw-materialB) - 117*xij(SAmerica,raw-materialA) - 77*xij(SAmerica,raw-materialB) - 6000*yi(NAmerica) - 4500*yi(SAmerica) =E= 0 ; (LHS = 0)
+     
+
+---- eqn1  =E=  
+
+eqn1(raw-materialA)..  xij(NAmerica,raw-materialA) + xij(SAmerica,raw-materialA) =E= 12 ; (LHS = 0, INFES = 12 ****)
+     
+eqn1(raw-materialB)..  xij(NAmerica,raw-materialB) + xij(SAmerica,raw-materialB) =E= 8 ; (LHS = 0, INFES = 8 ****)
+     
+
+---- eqn2  =L=  
+
+eqn2(NAmerica)..  xij(NAmerica,raw-materialA) + xij(NAmerica,raw-materialB) - 10*yi(NAmerica) =L= 0 ; (LHS = 0)
+     
+eqn2(SAmerica)..  xij(SAmerica,raw-materialA) + xij(SAmerica,raw-materialB) - 10*yi(SAmerica) =L= 0 ; (LHS = 0)
+     
+
+---- eqn3  =G=  
+
+eqn3(NAmerica,raw-materialA)..  xij(NAmerica,raw-materialA) =G= 0 ; (LHS = 0)
+     
+eqn3(NAmerica,raw-materialB)..  xij(NAmerica,raw-materialB) =G= 0 ; (LHS = 0)
+     
+eqn3(SAmerica,raw-materialA)..  xij(SAmerica,raw-materialA) =G= 0 ; (LHS = 0)
+     
+REMAINING ENTRY SKIPPED
+
+
+---- eqn4  =L=  
+
+eqn4(day1)..  325*u_pt(productA,day1) + 300*u_pt(productB,day1) =L= 250324 ; (LHS = 0)
+     
+eqn4(day2)..  325*u_pt(productA,day2) + 300*u_pt(productB,day2) =L= 250324 ; (LHS = 0)
+     
+
+---- eqn5  =L=  
+
+eqn5(wholesalerA,day1)..  325*u11(wholesalerA,productA,day1) + 300*u11(wholesalerA,productB,day1) =L= 25023 ; (LHS = 0)
+     
+eqn5(wholesalerA,day2)..  325*u11(wholesalerA,productA,day2) + 300*u11(wholesalerA,productB,day2) =L= 25023 ; (LHS = 0)
+     
+eqn5(wholesalerB,day1)..  325*u11(wholesalerB,productA,day1) + 300*u11(wholesalerB,productB,day1) =L= 23235 ; (LHS = 0)
+     
+REMAINING ENTRY SKIPPED
+
+
+---- eqn6  =E=  
+
+eqn6(day1,raw-materialA)..  - u1(raw-materialA,day1) + y(supplierA,vehicle-supplierA,raw-materialA,day1) + y(supplierA,vehicle-supplierB,raw-materialA,day1) + y(supplierB,vehicle-supplierA,raw-materialA,day1) + y(supplierB,vehicle-supplierB,raw-materialA,day1) - 21*y1(productA,day1) - 12*y1(productB,day1) =E= 0 ; (LHS = 0)
+     
+eqn6(day1,raw-materialB)..  - u1(raw-materialB,day1) + y(supplierA,vehicle-supplierA,raw-materialB,day1) + y(supplierA,vehicle-supplierB,raw-materialB,day1) + y(supplierB,vehicle-supplierA,raw-materialB,day1) + y(supplierB,vehicle-supplierB,raw-materialB,day1) - 233*y1(productA,day1) - 232*y1(productB,day1) =E= 0 ; (LHS = 0)
+     
+eqn6(day2,raw-materialA)..  u1(raw-materialA,day1) - u1(raw-materialA,day2) + y(supplierA,vehicle-supplierA,raw-materialA,day2) + y(supplierA,vehicle-supplierB,raw-materialA,day2) + y(supplierB,vehicle-supplierA,raw-materialA,day2) + y(supplierB,vehicle-supplierB,raw-materialA,day2) - 21*y1(productA,day2) - 12*y1(productB,day2) =E= 0 ; (LHS = 0)
+     
+REMAINING ENTRY SKIPPED
+
+
+---- eqn7  =L=  
+
+eqn7(supplierA,vehicle-supplierA,day1)..  104*w(supplierA,vehicle-supplierA,day1) - 10*x(supplierA,vehicle-supplierA,day1) =L= 0 ; (LHS = 0)
+     
+eqn7(supplierA,vehicle-supplierA,day2)..  104*w(supplierA,vehicle-supplierA,day2) - 10*x(supplierA,vehicle-supplierA,day2) =L= 0 ; (LHS = 0)
+     
+eqn7(supplierA,vehicle-supplierB,day1)..  104*w(supplierA,vehicle-supplierB,day1) - 10*x(supplierA,vehicle-supplierB,day1) =L= 0 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- eqn8  =L=  
+
+eqn8(factoryVehicleA,day1)..  2358*w1(wholesalerA,factoryVehicleA,day1) + 3239*w1(wholesalerB,factoryVehicleA,day1) =L= 10 ; (LHS = 0)
+     
+eqn8(factoryVehicleA,day2)..  2358*w1(wholesalerA,factoryVehicleA,day2) + 3239*w1(wholesalerB,factoryVehicleA,day2) =L= 10 ; (LHS = 0)
+     
+eqn8(factoryVehicleB,day1)..  2358*w1(wholesalerA,factoryVehicleB,day1) + 3239*w1(wholesalerB,factoryVehicleB,day1) =L= 10 ; (LHS = 0)
+     
+REMAINING ENTRY SKIPPED
+
+
+---- eqn9  =L=  
+
+eqn9(wholesalerA,wholesalerVehicleA,day1)..  326*w11(wholesalerA,retailerA,wholesalerVehicleA,day1) + 27*w11(wholesalerA,retailerB,wholesalerVehicleA,day1) =L= 10 ; (LHS = 0)
+     
+eqn9(wholesalerA,wholesalerVehicleA,day2)..  326*w11(wholesalerA,retailerA,wholesalerVehicleA,day2) + 27*w11(wholesalerA,retailerB,wholesalerVehicleA,day2) =L= 10 ; (LHS = 0)
+     
+eqn9(wholesalerA,wholesalerVehicleB,day1)..  326*w11(wholesalerA,retailerA,wholesalerVehicleB,day1) + 27*w11(wholesalerA,retailerB,wholesalerVehicleB,day1) =L= 10 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- eqn10  =L=  
+
+eqn10(wholesalerA,factoryVehicleA,day1)..  w1(wholesalerA,factoryVehicleA,day1) - 10000000*x1(wholesalerA,factoryVehicleA,day1) =L= 0 ; (LHS = 0)
+     
+eqn10(wholesalerA,factoryVehicleA,day2)..  w1(wholesalerA,factoryVehicleA,day2) - 10000000*x1(wholesalerA,factoryVehicleA,day2) =L= 0 ; (LHS = 0)
+     
+eqn10(wholesalerA,factoryVehicleB,day1)..  w1(wholesalerA,factoryVehicleB,day1) - 10000000*x1(wholesalerA,factoryVehicleB,day1) =L= 0 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- eqn11  =L=  
+
+eqn11(wholesalerA,retailerA,wholesalerVehicleA,day1)..  w11(wholesalerA,retailerA,wholesalerVehicleA,day1) - 100000000000*x11(wholesalerA,retailerA,wholesalerVehicleA,day1) =L= 0 ; (LHS = 0)
+     
+eqn11(wholesalerA,retailerA,wholesalerVehicleA,day2)..  w11(wholesalerA,retailerA,wholesalerVehicleA,day2) - 100000000000*x11(wholesalerA,retailerA,wholesalerVehicleA,day2) =L= 0 ; (LHS = 0)
+     
+eqn11(wholesalerA,retailerA,wholesalerVehicleB,day1)..  w11(wholesalerA,retailerA,wholesalerVehicleB,day1) - 100000000000*x11(wholesalerA,retailerA,wholesalerVehicleB,day1) =L= 0 ; (LHS = 0)
+     
+REMAINING 13 ENTRIES SKIPPED
+
+
+---- eqn12  =E=  
+
+eqn12(productA,day1)..  - u_pt(productA,day1) + y1(productA,day1) - y11(wholesalerA,wholesalerVehicleA,productA,day1) - y11(wholesalerA,wholesalerVehicleB,productA,day1) - y11(wholesalerB,wholesalerVehicleA,productA,day1) - y11(wholesalerB,wholesalerVehicleB,productA,day1) =E= 0 ; (LHS = 0)
+     
+eqn12(productA,day2)..  u_pt(productA,day1) - u_pt(productA,day2) + y1(productA,day2) - y11(wholesalerA,wholesalerVehicleA,productA,day2) - y11(wholesalerA,wholesalerVehicleB,productA,day2) - y11(wholesalerB,wholesalerVehicleA,productA,day2) - y11(wholesalerB,wholesalerVehicleB,productA,day2) =E= 0 ; (LHS = 0)
+     
+eqn12(productB,day1)..  - u_pt(productB,day1) + y1(productB,day1) - y11(wholesalerA,wholesalerVehicleA,productB,day1) - y11(wholesalerA,wholesalerVehicleB,productB,day1) - y11(wholesalerB,wholesalerVehicleA,productB,day1) - y11(wholesalerB,wholesalerVehicleB,productB,day1) =E= 0 ; (LHS = 0)
+     
+REMAINING ENTRY SKIPPED
+
+
+---- eqn13  =E=  
+
+eqn13(wholesalerA,productA,day1)..  - y111(wholesalerA,retailerA,wholesalerVehicleA,productA,day1) - y111(wholesalerA,retailerA,wholesalerVehicleB,productA,day1) - y111(wholesalerA,retailerB,wholesalerVehicleA,productA,day1) - y111(wholesalerA,retailerB,wholesalerVehicleB,productA,day1) - u11(wholesalerA,productA,day1) + y11(wholesalerA,wholesalerVehicleA,productA,day1) + y11(wholesalerA,wholesalerVehicleB,productA,day1) =E= 0 ; (LHS = 0)
+     
+eqn13(wholesalerA,productA,day2)..  - y111(wholesalerA,retailerA,wholesalerVehicleA,productA,day2) - y111(wholesalerA,retailerA,wholesalerVehicleB,productA,day2) - y111(wholesalerA,retailerB,wholesalerVehicleA,productA,day2) - y111(wholesalerA,retailerB,wholesalerVehicleB,productA,day2) + u11(wholesalerA,productA,day1) - u11(wholesalerA,productA,day2) + y11(wholesalerA,wholesalerVehicleA,productA,day2) + y11(wholesalerA,wholesalerVehicleB,productA,day2) =E= 0 ; (LHS = 0)
+     
+eqn13(wholesalerA,productB,day1)..  - y111(wholesalerA,retailerA,wholesalerVehicleA,productB,day1) - y111(wholesalerA,retailerA,wholesalerVehicleB,productB,day1) - y111(wholesalerA,retailerB,wholesalerVehicleA,productB,day1) - y111(wholesalerA,retailerB,wholesalerVehicleB,productB,day1) - u11(wholesalerA,productB,day1) + y11(wholesalerA,wholesalerVehicleA,productB,day1) + y11(wholesalerA,wholesalerVehicleB,productB,day1) =E= 0 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- eqn14  =E=  
+
+eqn14(retailerA,productA,day1)..  y111(wholesalerA,retailerA,wholesalerVehicleA,productA,day1) + y111(wholesalerA,retailerA,wholesalerVehicleB,productA,day1) + y111(wholesalerB,retailerA,wholesalerVehicleA,productA,day1) + y111(wholesalerB,retailerA,wholesalerVehicleB,productA,day1) + bo(retailerA,productA,day1) - u111(retailerA,productA,day1) =E= 20 ; (LHS = 0, INFES = 20 ****)
+     
+eqn14(retailerA,productA,day2)..  y111(wholesalerA,retailerA,wholesalerVehicleA,productA,day2) + y111(wholesalerA,retailerA,wholesalerVehicleB,productA,day2) + y111(wholesalerB,retailerA,wholesalerVehicleA,productA,day2) + y111(wholesalerB,retailerA,wholesalerVehicleB,productA,day2) + bo(retailerA,productA,day2) + u111(retailerA,productA,day1) - u111(retailerA,productA,day2) =E= 18 ; (LHS = 0, INFES = 18 ****)
+     
+eqn14(retailerA,productB,day1)..  y111(wholesalerA,retailerA,wholesalerVehicleA,productB,day1) + y111(wholesalerA,retailerA,wholesalerVehicleB,productB,day1) + y111(wholesalerB,retailerA,wholesalerVehicleA,productB,day1) + y111(wholesalerB,retailerA,wholesalerVehicleB,productB,day1) + bo(retailerA,productB,day1) - u111(retailerA,productB,day1) =E= 21 ; (LHS = 0, INFES = 21 ****)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- eqn15  =L=  
+
+eqn15(retailerA,vehicleA,collection-centerA,day1)..  - 80*wb(retailerA,vehicleA,collection-centerA,day1) + 325*yb(retailerA,vehicleA,collection-centerA,productA,day1) + 300*yb(retailerA,vehicleA,collection-centerA,productB,day1) =L= 0 ; (LHS = 0)
+     
+eqn15(retailerA,vehicleA,collection-centerA,day2)..  - 80*wb(retailerA,vehicleA,collection-centerA,day2) + 325*yb(retailerA,vehicleA,collection-centerA,productA,day2) + 300*yb(retailerA,vehicleA,collection-centerA,productB,day2) =L= 0 ; (LHS = 0)
+     
+eqn15(retailerA,vehicleA,collection-centerB,day1)..  - 80*wb(retailerA,vehicleA,collection-centerB,day1) + 325*yb(retailerA,vehicleA,collection-centerB,productA,day1) + 300*yb(retailerA,vehicleA,collection-centerB,productB,day1) =L= 0 ; (LHS = 0)
+     
+REMAINING 13 ENTRIES SKIPPED
+
+
+---- eqn16  =L=  
+
+eqn16(vehicleC,collection-centerA,day1)..  - 80*wb1(vehicleC,collection-centerA,day1) + 325*yb1(vehicleC,collection-centerA,raw-materialA,day1) + 300*yb1(vehicleC,collection-centerA,raw-materialB,day1) =L= 0 ; (LHS = 0)
+     
+eqn16(vehicleC,collection-centerA,day2)..  - 80*wb1(vehicleC,collection-centerA,day2) + 325*yb1(vehicleC,collection-centerA,raw-materialA,day2) + 300*yb1(vehicleC,collection-centerA,raw-materialB,day2) =L= 0 ; (LHS = 0)
+     
+eqn16(vehicleC,collection-centerB,day1)..  - 80*wb1(vehicleC,collection-centerB,day1) + 325*yb1(vehicleC,collection-centerB,raw-materialA,day1) + 300*yb1(vehicleC,collection-centerB,raw-materialB,day1) =L= 0 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- eqn17  =L=  
+
+eqn17(vehicleA,collection-centerA,day1)..  3*wb(retailerA,vehicleA,collection-centerA,day1) + 2*wb(retailerB,vehicleA,collection-centerA,day1) =L= 10 ; (LHS = 0)
+     
+eqn17(vehicleA,collection-centerA,day2)..  3*wb(retailerA,vehicleA,collection-centerA,day2) + 2*wb(retailerB,vehicleA,collection-centerA,day2) =L= 10 ; (LHS = 0)
+     
+eqn17(vehicleA,collection-centerB,day1)..  2*wb(retailerA,vehicleA,collection-centerB,day1) + 3*wb(retailerB,vehicleA,collection-centerB,day1) =L= 10 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- eqn18  =L=  
+
+eqn18(vehicleC,collection-centerA,day1)..  7*wb1(vehicleC,collection-centerA,day1) - 10*xb1(vehicleC,collection-centerA,day1) =L= 0 ; (LHS = 0)
+     
+eqn18(vehicleC,collection-centerA,day2)..  7*wb1(vehicleC,collection-centerA,day2) - 10*xb1(vehicleC,collection-centerA,day2) =L= 0 ; (LHS = 0)
+     
+eqn18(vehicleC,collection-centerB,day1)..  8*wb1(vehicleC,collection-centerB,day1) - 10*xb1(vehicleC,collection-centerB,day1) =L= 0 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- eqn19  =L=  
+
+eqn19(collection-centerA,vehicleA,retailerA,day1)..  wb(retailerA,vehicleA,collection-centerA,day1) - 10000000*xb(retailerA,vehicleA,collection-centerA,day1) =L= 0 ; (LHS = 0)
+     
+eqn19(collection-centerA,vehicleA,retailerA,day2)..  wb(retailerA,vehicleA,collection-centerA,day2) - 10000000*xb(retailerA,vehicleA,collection-centerA,day2) =L= 0 ; (LHS = 0)
+     
+eqn19(collection-centerA,vehicleA,retailerB,day1)..  wb(retailerB,vehicleA,collection-centerA,day1) - 10000000*xb(retailerB,vehicleA,collection-centerA,day1) =L= 0 ; (LHS = 0)
+     
+REMAINING 13 ENTRIES SKIPPED
+
+
+---- eqn20  =E=  
+
+eqn20(day1,raw-materialA)..  - u1(raw-materialA,day1) + yb1(vehicleC,collection-centerA,raw-materialA,day1) + yb1(vehicleC,collection-centerB,raw-materialA,day1) + yb1(vehicleD,collection-centerA,raw-materialA,day1) + yb1(vehicleD,collection-centerB,raw-materialA,day1) + y(supplierA,vehicle-supplierA,raw-materialA,day1) + y(supplierA,vehicle-supplierB,raw-materialA,day1) + y(supplierB,vehicle-supplierA,raw-materialA,day1) + y(supplierB,vehicle-supplierB,raw-materialA,day1) - 21*y1(productA,day1) - 12*y1(productB,day1) =E= 0 ; (LHS = 0)
+     
+eqn20(day1,raw-materialB)..  - u1(raw-materialB,day1) + yb1(vehicleC,collection-centerA,raw-materialB,day1) + yb1(vehicleC,collection-centerB,raw-materialB,day1) + yb1(vehicleD,collection-centerA,raw-materialB,day1) + yb1(vehicleD,collection-centerB,raw-materialB,day1) + y(supplierA,vehicle-supplierA,raw-materialB,day1) + y(supplierA,vehicle-supplierB,raw-materialB,day1) + y(supplierB,vehicle-supplierA,raw-materialB,day1) + y(supplierB,vehicle-supplierB,raw-materialB,day1) - 233*y1(productA,day1) - 232*y1(productB,day1) =E= 0 ; (LHS = 0)
+     
+eqn20(day2,raw-materialA)..  u1(raw-materialA,day1) - u1(raw-materialA,day2) + yb1(vehicleC,collection-centerA,raw-materialA,day2) + yb1(vehicleC,collection-centerB,raw-materialA,day2) + yb1(vehicleD,collection-centerA,raw-materialA,day2) + yb1(vehicleD,collection-centerB,raw-materialA,day2) + y(supplierA,vehicle-supplierA,raw-materialA,day2) + y(supplierA,vehicle-supplierB,raw-materialA,day2) + y(supplierB,vehicle-supplierA,raw-materialA,day2) + y(supplierB,vehicle-supplierB,raw-materialA,day2) - 21*y1(productA,day2) - 12*y1(productB,day2) =E= 0 ; (LHS = 0)
+     
+REMAINING ENTRY SKIPPED
+
+
+---- eqn21  =L=  
+
+eqn21(supplierA,vehicle-supplierA,day1)..  - 70*w(supplierA,vehicle-supplierA,day1) + 325*y(supplierA,vehicle-supplierA,raw-materialA,day1) + 300*y(supplierA,vehicle-supplierA,raw-materialB,day1) =L= 0 ; (LHS = 0)
+     
+eqn21(supplierA,vehicle-supplierA,day2)..  - 70*w(supplierA,vehicle-supplierA,day2) + 325*y(supplierA,vehicle-supplierA,raw-materialA,day2) + 300*y(supplierA,vehicle-supplierA,raw-materialB,day2) =L= 0 ; (LHS = 0)
+     
+eqn21(supplierA,vehicle-supplierB,day1)..  - 80*w(supplierA,vehicle-supplierB,day1) + 325*y(supplierA,vehicle-supplierB,raw-materialA,day1) + 300*y(supplierA,vehicle-supplierB,raw-materialB,day1) =L= 0 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- eqn22  =L=  
+
+eqn22(wholesalerA,factoryVehicleA,wholesalerVehicleA,day1)..  - 75*w1(wholesalerA,factoryVehicleA,day1) + 325*y11(wholesalerA,wholesalerVehicleA,productA,day1) + 300*y11(wholesalerA,wholesalerVehicleA,productB,day1) =L= 0 ; (LHS = 0)
+     
+eqn22(wholesalerA,factoryVehicleA,wholesalerVehicleA,day2)..  - 75*w1(wholesalerA,factoryVehicleA,day2) + 325*y11(wholesalerA,wholesalerVehicleA,productA,day2) + 300*y11(wholesalerA,wholesalerVehicleA,productB,day2) =L= 0 ; (LHS = 0)
+     
+eqn22(wholesalerA,factoryVehicleA,wholesalerVehicleB,day1)..  - 75*w1(wholesalerA,factoryVehicleA,day1) + 325*y11(wholesalerA,wholesalerVehicleB,productA,day1) + 300*y11(wholesalerA,wholesalerVehicleB,productB,day1) =L= 0 ; (LHS = 0)
+     
+REMAINING 13 ENTRIES SKIPPED
+
+
+---- eqn23  =L=  
+
+eqn23(wholesalerA,retailerA,wholesalerVehicleA,day1)..  - 40*w11(wholesalerA,retailerA,wholesalerVehicleA,day1) + 325*y111(wholesalerA,retailerA,wholesalerVehicleA,productA,day1) + 300*y111(wholesalerA,retailerA,wholesalerVehicleA,productB,day1) =L= 0 ; (LHS = 0)
+     
+eqn23(wholesalerA,retailerA,wholesalerVehicleA,day2)..  - 40*w11(wholesalerA,retailerA,wholesalerVehicleA,day2) + 325*y111(wholesalerA,retailerA,wholesalerVehicleA,productA,day2) + 300*y111(wholesalerA,retailerA,wholesalerVehicleA,productB,day2) =L= 0 ; (LHS = 0)
+     
+eqn23(wholesalerA,retailerA,wholesalerVehicleB,day1)..  - 20*w11(wholesalerA,retailerA,wholesalerVehicleB,day1) + 325*y111(wholesalerA,retailerA,wholesalerVehicleB,productA,day1) + 300*y111(wholesalerA,retailerA,wholesalerVehicleB,productB,day1) =L= 0 ; (LHS = 0)
+     
+REMAINING 13 ENTRIES SKIPPED
+
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 11:09:12 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE supplychainmodel Using MIP From line 397
+
+
+---- z  
+
+z
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       cost
+
+
+---- xij  quantity shipped from plant i to market j
+
+xij(NAmerica,raw-materialA)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -81       cost
+        1       eqn1(raw-materialA)
+        1       eqn2(NAmerica)
+        1       eqn3(NAmerica,raw-materialA)
+
+xij(NAmerica,raw-materialB)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -92       cost
+        1       eqn1(raw-materialB)
+        1       eqn2(NAmerica)
+        1       eqn3(NAmerica,raw-materialB)
+
+xij(SAmerica,raw-materialA)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+     -117       cost
+        1       eqn1(raw-materialA)
+        1       eqn2(SAmerica)
+        1       eqn3(SAmerica,raw-materialA)
+
+REMAINING ENTRY SKIPPED
+
+---- w  
+
+w(supplierA,vehicle-supplierA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      104       eqn7(supplierA,vehicle-supplierA,day1)
+      -70       eqn21(supplierA,vehicle-supplierA,day1)
+
+w(supplierA,vehicle-supplierA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      104       eqn7(supplierA,vehicle-supplierA,day2)
+      -70       eqn21(supplierA,vehicle-supplierA,day2)
+
+w(supplierA,vehicle-supplierB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      104       eqn7(supplierA,vehicle-supplierB,day1)
+      -80       eqn21(supplierA,vehicle-supplierB,day1)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- w1  
+
+w1(wholesalerA,factoryVehicleA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+     2358       eqn8(factoryVehicleA,day1)
+        1       eqn10(wholesalerA,factoryVehicleA,day1)
+      -75       eqn22(wholesalerA,factoryVehicleA,wholesalerVehicleA,day1)
+      -75       eqn22(wholesalerA,factoryVehicleA,wholesalerVehicleB,day1)
+
+w1(wholesalerA,factoryVehicleA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+     2358       eqn8(factoryVehicleA,day2)
+        1       eqn10(wholesalerA,factoryVehicleA,day2)
+      -75       eqn22(wholesalerA,factoryVehicleA,wholesalerVehicleA,day2)
+      -75       eqn22(wholesalerA,factoryVehicleA,wholesalerVehicleB,day2)
+
+w1(wholesalerA,factoryVehicleB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+     2358       eqn8(factoryVehicleB,day1)
+        1       eqn10(wholesalerA,factoryVehicleB,day1)
+      -85       eqn22(wholesalerA,factoryVehicleB,wholesalerVehicleA,day1)
+      -85       eqn22(wholesalerA,factoryVehicleB,wholesalerVehicleB,day1)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- w11  
+
+w11(wholesalerA,retailerA,wholesalerVehicleA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      326       eqn9(wholesalerA,wholesalerVehicleA,day1)
+        1       eqn11(wholesalerA,retailerA,wholesalerVehicleA,day1)
+      -40       eqn23(wholesalerA,retailerA,wholesalerVehicleA,day1)
+
+w11(wholesalerA,retailerA,wholesalerVehicleA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      326       eqn9(wholesalerA,wholesalerVehicleA,day2)
+        1       eqn11(wholesalerA,retailerA,wholesalerVehicleA,day2)
+      -40       eqn23(wholesalerA,retailerA,wholesalerVehicleA,day2)
+
+w11(wholesalerA,retailerA,wholesalerVehicleB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      326       eqn9(wholesalerA,wholesalerVehicleB,day1)
+        1       eqn11(wholesalerA,retailerA,wholesalerVehicleB,day1)
+      -20       eqn23(wholesalerA,retailerA,wholesalerVehicleB,day1)
+
+REMAINING 13 ENTRIES SKIPPED
+
+---- y111  number of product p transported by vehicle g from wholesaller b to retailer e on day t
+
+y111(wholesalerA,retailerA,wholesalerVehicleA,productA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn13(wholesalerA,productA,day1)
+        1       eqn14(retailerA,productA,day1)
+      325       eqn23(wholesalerA,retailerA,wholesalerVehicleA,day1)
+
+y111(wholesalerA,retailerA,wholesalerVehicleA,productA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn13(wholesalerA,productA,day2)
+        1       eqn14(retailerA,productA,day2)
+      325       eqn23(wholesalerA,retailerA,wholesalerVehicleA,day2)
+
+y111(wholesalerA,retailerA,wholesalerVehicleA,productB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn13(wholesalerA,productB,day1)
+        1       eqn14(retailerA,productB,day1)
+      300       eqn23(wholesalerA,retailerA,wholesalerVehicleA,day1)
+
+REMAINING 29 ENTRIES SKIPPED
+
+---- bo  
+
+bo(retailerA,productA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       eqn14(retailerA,productA,day1)
+
+bo(retailerA,productA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       eqn14(retailerA,productA,day2)
+
+bo(retailerA,productB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       eqn14(retailerA,productB,day1)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- u1  
+
+u1(raw-materialA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn6(day1,raw-materialA)
+        1       eqn6(day2,raw-materialA)
+       -1       eqn20(day1,raw-materialA)
+        1       eqn20(day2,raw-materialA)
+
+u1(raw-materialA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn6(day2,raw-materialA)
+       -1       eqn20(day2,raw-materialA)
+
+u1(raw-materialB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn6(day1,raw-materialB)
+        1       eqn6(day2,raw-materialB)
+       -1       eqn20(day1,raw-materialB)
+        1       eqn20(day2,raw-materialB)
+
+REMAINING ENTRY SKIPPED
+
+---- u_pt  
+
+u_pt(productA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      325       eqn4(day1)
+       -1       eqn12(productA,day1)
+        1       eqn12(productA,day2)
+
+u_pt(productA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      325       eqn4(day2)
+       -1       eqn12(productA,day2)
+
+u_pt(productB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      300       eqn4(day1)
+       -1       eqn12(productB,day1)
+        1       eqn12(productB,day2)
+
+REMAINING ENTRY SKIPPED
+
+---- u11  
+
+u11(wholesalerA,productA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      325       eqn5(wholesalerA,day1)
+       -1       eqn13(wholesalerA,productA,day1)
+        1       eqn13(wholesalerA,productA,day2)
+
+u11(wholesalerA,productA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      325       eqn5(wholesalerA,day2)
+       -1       eqn13(wholesalerA,productA,day2)
+
+u11(wholesalerA,productB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      300       eqn5(wholesalerA,day1)
+       -1       eqn13(wholesalerA,productB,day1)
+        1       eqn13(wholesalerA,productB,day2)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- u111  storage inventory or customer e from product p on day t
+
+u111(retailerA,productA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn14(retailerA,productA,day1)
+        1       eqn14(retailerA,productA,day2)
+
+u111(retailerA,productA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn14(retailerA,productA,day2)
+
+u111(retailerA,productB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn14(retailerA,productB,day1)
+        1       eqn14(retailerA,productB,day2)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- wb  
+
+wb(retailerA,vehicleA,collection-centerA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -80       eqn15(retailerA,vehicleA,collection-centerA,day1)
+        3       eqn17(vehicleA,collection-centerA,day1)
+        1       eqn19(collection-centerA,vehicleA,retailerA,day1)
+
+wb(retailerA,vehicleA,collection-centerA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -80       eqn15(retailerA,vehicleA,collection-centerA,day2)
+        3       eqn17(vehicleA,collection-centerA,day2)
+        1       eqn19(collection-centerA,vehicleA,retailerA,day2)
+
+wb(retailerA,vehicleA,collection-centerB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -80       eqn15(retailerA,vehicleA,collection-centerB,day1)
+        2       eqn17(vehicleA,collection-centerB,day1)
+        1       eqn19(collection-centerB,vehicleA,retailerA,day1)
+
+REMAINING 13 ENTRIES SKIPPED
+
+---- wb1  
+
+wb1(vehicleC,collection-centerA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -80       eqn16(vehicleC,collection-centerA,day1)
+        7       eqn18(vehicleC,collection-centerA,day1)
+
+wb1(vehicleC,collection-centerA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -80       eqn16(vehicleC,collection-centerA,day2)
+        7       eqn18(vehicleC,collection-centerA,day2)
+
+wb1(vehicleC,collection-centerB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -80       eqn16(vehicleC,collection-centerB,day1)
+        8       eqn18(vehicleC,collection-centerB,day1)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- yb  amount of p product sent retailer e to collection-center j on day t using vehicle i
+
+yb(retailerA,vehicleA,collection-centerA,productA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      325       eqn15(retailerA,vehicleA,collection-centerA,day1)
+
+yb(retailerA,vehicleA,collection-centerA,productA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      325       eqn15(retailerA,vehicleA,collection-centerA,day2)
+
+yb(retailerA,vehicleA,collection-centerA,productB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      300       eqn15(retailerA,vehicleA,collection-centerA,day1)
+
+REMAINING 29 ENTRIES SKIPPED
+
+---- yb1  
+
+yb1(vehicleC,collection-centerA,raw-materialA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      325       eqn16(vehicleC,collection-centerA,day1)
+        1       eqn20(day1,raw-materialA)
+
+yb1(vehicleC,collection-centerA,raw-materialA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      325       eqn16(vehicleC,collection-centerA,day2)
+        1       eqn20(day2,raw-materialA)
+
+yb1(vehicleC,collection-centerA,raw-materialB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      300       eqn16(vehicleC,collection-centerA,day1)
+        1       eqn20(day1,raw-materialB)
+
+REMAINING 13 ENTRIES SKIPPED
+
+---- y  m material sent by v vahicle from a supplier to the factory on t day
+
+y(supplierA,vehicle-supplierA,raw-materialA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       eqn6(day1,raw-materialA)
+        1       eqn20(day1,raw-materialA)
+      325       eqn21(supplierA,vehicle-supplierA,day1)
+
+y(supplierA,vehicle-supplierA,raw-materialA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       eqn6(day2,raw-materialA)
+        1       eqn20(day2,raw-materialA)
+      325       eqn21(supplierA,vehicle-supplierA,day2)
+
+y(supplierA,vehicle-supplierA,raw-materialB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       eqn6(day1,raw-materialB)
+        1       eqn20(day1,raw-materialB)
+      300       eqn21(supplierA,vehicle-supplierA,day1)
+
+REMAINING 13 ENTRIES SKIPPED
+
+---- y1  
+
+y1(productA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -21       eqn6(day1,raw-materialA)
+     -233       eqn6(day1,raw-materialB)
+        1       eqn12(productA,day1)
+      -21       eqn20(day1,raw-materialA)
+     -233       eqn20(day1,raw-materialB)
+
+y1(productA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -21       eqn6(day2,raw-materialA)
+     -233       eqn6(day2,raw-materialB)
+        1       eqn12(productA,day2)
+      -21       eqn20(day2,raw-materialA)
+     -233       eqn20(day2,raw-materialB)
+
+y1(productB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -12       eqn6(day1,raw-materialA)
+     -232       eqn6(day1,raw-materialB)
+        1       eqn12(productB,day1)
+      -12       eqn20(day1,raw-materialA)
+     -232       eqn20(day1,raw-materialB)
+
+REMAINING ENTRY SKIPPED
+
+---- y11  
+
+y11(wholesalerA,wholesalerVehicleA,productA,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn12(productA,day1)
+        1       eqn13(wholesalerA,productA,day1)
+      325       eqn22(wholesalerA,factoryVehicleA,wholesalerVehicleA,day1)
+      325       eqn22(wholesalerA,factoryVehicleB,wholesalerVehicleA,day1)
+
+y11(wholesalerA,wholesalerVehicleA,productA,day2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn12(productA,day2)
+        1       eqn13(wholesalerA,productA,day2)
+      325       eqn22(wholesalerA,factoryVehicleA,wholesalerVehicleA,day2)
+      325       eqn22(wholesalerA,factoryVehicleB,wholesalerVehicleA,day2)
+
+y11(wholesalerA,wholesalerVehicleA,productB,day1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       eqn12(productB,day1)
+        1       eqn13(wholesalerA,productB,day1)
+      300       eqn22(wholesalerA,factoryVehicleA,wholesalerVehicleA,day1)
+      300       eqn22(wholesalerA,factoryVehicleB,wholesalerVehicleA,day1)
+
+REMAINING 13 ENTRIES SKIPPED
+
+---- yi  plant i on or off
+
+yi(NAmerica)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+    -6000       cost
+      -10       eqn2(NAmerica)
+
+yi(SAmerica)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+    -4500       cost
+      -10       eqn2(SAmerica)
+
+
+---- x  
+
+x(supplierA,vehicle-supplierA,day1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      -10       eqn7(supplierA,vehicle-supplierA,day1)
+
+x(supplierA,vehicle-supplierA,day2)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      -10       eqn7(supplierA,vehicle-supplierA,day2)
+
+x(supplierA,vehicle-supplierB,day1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      -10       eqn7(supplierA,vehicle-supplierB,day1)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- x1  
+
+x1(wholesalerA,factoryVehicleA,day1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+  -1.000000E+7  eqn10(wholesalerA,factoryVehicleA,day1)
+
+x1(wholesalerA,factoryVehicleA,day2)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+  -1.000000E+7  eqn10(wholesalerA,factoryVehicleA,day2)
+
+x1(wholesalerA,factoryVehicleB,day1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+  -1.000000E+7  eqn10(wholesalerA,factoryVehicleB,day1)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- x11  
+
+x11(wholesalerA,retailerA,wholesalerVehicleA,day1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+  -1.00000E+11  eqn11(wholesalerA,retailerA,wholesalerVehicleA,day1)
+
+x11(wholesalerA,retailerA,wholesalerVehicleA,day2)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+  -1.00000E+11  eqn11(wholesalerA,retailerA,wholesalerVehicleA,day2)
+
+x11(wholesalerA,retailerA,wholesalerVehicleB,day1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+  -1.00000E+11  eqn11(wholesalerA,retailerA,wholesalerVehicleB,day1)
+
+REMAINING 13 ENTRIES SKIPPED
+
+---- xb  
+
+xb(retailerA,vehicleA,collection-centerA,day1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+  -1.000000E+7  eqn19(collection-centerA,vehicleA,retailerA,day1)
+
+xb(retailerA,vehicleA,collection-centerA,day2)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+  -1.000000E+7  eqn19(collection-centerA,vehicleA,retailerA,day2)
+
+xb(retailerA,vehicleA,collection-centerB,day1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+  -1.000000E+7  eqn19(collection-centerB,vehicleA,retailerA,day1)
+
+REMAINING 13 ENTRIES SKIPPED
+
+---- xb1  
+
+xb1(vehicleC,collection-centerA,day1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      -10       eqn18(vehicleC,collection-centerA,day1)
+
+xb1(vehicleC,collection-centerA,day2)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      -10       eqn18(vehicleC,collection-centerA,day2)
+
+xb1(vehicleC,collection-centerB,day1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      -10       eqn18(vehicleC,collection-centerB,day1)
+
+REMAINING 5 ENTRIES SKIPPED
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 11:09:12 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE supplychainmodel Using MIP From line 397
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 8.000E+00, 2.503E+05] - Zero values observed as well
+Bound     [min, max] : [ 1.000E+00, 1.000E+00] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 1.000E+11]
+
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 11:09:12 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE supplychainmodel Using MIP From line 397
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS          24     SINGLE EQUATIONS          183
+BLOCKS OF VARIABLES          24     SINGLE VARIABLES          267
+NON ZERO ELEMENTS           591     DISCRETE VARIABLES         58
+
+
+GENERATION TIME      =        0.015 SECONDS      4 MB  39.2.0 e0c5072f WEX-WEI
+GAMS 39.2.0  e0c5072f Jun 2, 2022           WEX-WEI x86 64bit/MS Windows - 09/08/22 11:09:12 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE supplychainmodel Using MIP From line 397
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   supplychainmodel    OBJECTIVE  z
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  397
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE            12160.0000
+
+ RESOURCE USAGE, LIMIT          0.016 10000000000.000
+ ITERATION COUNT, LIMIT         0    2147483647
+--- *** This solver runs with a demo license. No commercial use.
+--- GMO setup time: 0.00s
+--- Space for names approximately 0.02 Mb
+--- Use option 'names no' to turn use of names off
+--- GMO memory 0.55 Mb (peak 0.55 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.1.0.0 link memory 0.01 Mb (peak 0.04 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.00sec (det. 0.57 ticks)
+
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.40 ticks)
+
+
+Proven optimal solution
+MIP Solution:        12160.000000    (0 iterations, 0 nodes)
+Final Solve:         12160.000000    (7 iterations)
+
+Best possible:       12160.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU cost                .              .              .             1.0000      
+
+---- EQU eqn1  
+
+                     LOWER          LEVEL          UPPER         MARGINAL
+
+raw-materialA        12.0000        12.0000        12.0000       117.0000      
+raw-materialB         8.0000         8.0000         8.0000        77.0000      
+
+---- EQU eqn2  
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+NAmerica        -INF             .              .           -36.0000      
+SAmerica        -INF             .              .              .          
+
+---- EQU eqn3  
+
+                              LOWER          LEVEL          UPPER         MARGINAL
+
+NAmerica.raw-materialA          .            10.0000        +INF             .          
+NAmerica.raw-materialB          .              .            +INF             .          
+SAmerica.raw-materialA          .             2.0000        +INF             .          
+SAmerica.raw-materialB          .             8.0000        +INF             .          
+
+---- EQU eqn4  
+
+            LOWER          LEVEL          UPPER         MARGINAL
+
+day1        -INF             .        250324.0000          .          
+day2        -INF             .        250324.0000          .          
+
+---- EQU eqn5  
+
+                        LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.day1        -INF             .         25023.0000          .          
+wholesalerA.day2        -INF             .         25023.0000          .          
+wholesalerB.day1        -INF             .         23235.0000          .          
+wholesalerB.day2        -INF             .         23235.0000          .          
+
+---- EQU eqn6  
+
+                          LOWER          LEVEL          UPPER         MARGINAL
+
+day1.raw-materialA          .              .              .             EPS         
+day1.raw-materialB          .              .              .             EPS         
+day2.raw-materialA          .              .              .             EPS         
+day2.raw-materialB          .              .              .             EPS         
+
+---- EQU eqn7  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+supplierA.vehicle-supplierA.day1        -INF             .              .             EPS         
+supplierA.vehicle-supplierA.day2        -INF             .              .             EPS         
+supplierA.vehicle-supplierB.day1        -INF             .              .             EPS         
+supplierA.vehicle-supplierB.day2        -INF             .              .             EPS         
+supplierB.vehicle-supplierA.day1        -INF             .              .             EPS         
+supplierB.vehicle-supplierA.day2        -INF             .              .             EPS         
+supplierB.vehicle-supplierB.day1        -INF             .              .             EPS         
+supplierB.vehicle-supplierB.day2        -INF             .              .             EPS         
+
+---- EQU eqn8  
+
+                            LOWER          LEVEL          UPPER         MARGINAL
+
+factoryVehicleA.day1        -INF           10.0000        10.0000         EPS         
+factoryVehicleA.day2        -INF           10.0000        10.0000         EPS         
+factoryVehicleB.day1        -INF           10.0000        10.0000         EPS         
+factoryVehicleB.day2        -INF           10.0000        10.0000         EPS         
+
+---- EQU eqn9  
+
+                                           LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.wholesalerVehicleA.day1        -INF           10.0000        10.0000         EPS         
+wholesalerA.wholesalerVehicleA.day2        -INF           10.0000        10.0000         EPS         
+wholesalerA.wholesalerVehicleB.day1        -INF           10.0000        10.0000         EPS         
+wholesalerA.wholesalerVehicleB.day2        -INF           10.0000        10.0000         EPS         
+wholesalerB.wholesalerVehicleA.day1        -INF           10.0000        10.0000         EPS         
+wholesalerB.wholesalerVehicleA.day2        -INF           10.0000        10.0000         EPS         
+wholesalerB.wholesalerVehicleB.day1        -INF           10.0000        10.0000         EPS         
+wholesalerB.wholesalerVehicleB.day2        -INF           10.0000        10.0000         EPS         
+
+---- EQU eqn10  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.factoryVehicleA.day1        -INF      -1.000000E+7          .              .          
+wholesalerA.factoryVehicleA.day2        -INF      -1.000000E+7          .              .          
+wholesalerA.factoryVehicleB.day1        -INF      -1.000000E+7          .              .          
+wholesalerA.factoryVehicleB.day2        -INF      -1.000000E+7          .              .          
+wholesalerB.factoryVehicleA.day1        -INF      -1.000000E+7          .              .          
+wholesalerB.factoryVehicleA.day2        -INF      -1.000000E+7          .              .          
+wholesalerB.factoryVehicleB.day1        -INF      -1.000000E+7          .              .          
+wholesalerB.factoryVehicleB.day2        -INF      -1.000000E+7          .              .          
+
+---- EQU eqn11  
+
+                                                     LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.retailerA.wholesalerVehicleA.day1        -INF      -1.00000E+11          .              .          
+wholesalerA.retailerA.wholesalerVehicleA.day2        -INF      -1.00000E+11          .              .          
+wholesalerA.retailerA.wholesalerVehicleB.day1        -INF      -1.00000E+11          .              .          
+wholesalerA.retailerA.wholesalerVehicleB.day2        -INF      -1.00000E+11          .              .          
+wholesalerA.retailerB.wholesalerVehicleA.day1        -INF      -1.00000E+11          .              .          
+wholesalerA.retailerB.wholesalerVehicleA.day2        -INF      -1.00000E+11          .              .          
+wholesalerA.retailerB.wholesalerVehicleB.day1        -INF      -1.00000E+11          .              .          
+wholesalerA.retailerB.wholesalerVehicleB.day2        -INF      -1.00000E+11          .              .          
+wholesalerB.retailerA.wholesalerVehicleA.day1        -INF      -1.00000E+11          .              .          
+wholesalerB.retailerA.wholesalerVehicleA.day2        -INF      -1.00000E+11          .              .          
+wholesalerB.retailerA.wholesalerVehicleB.day1        -INF      -1.00000E+11          .              .          
+wholesalerB.retailerA.wholesalerVehicleB.day2        -INF      -1.00000E+11          .              .          
+wholesalerB.retailerB.wholesalerVehicleA.day1        -INF      -1.00000E+11          .              .          
+wholesalerB.retailerB.wholesalerVehicleA.day2        -INF      -1.00000E+11          .              .          
+wholesalerB.retailerB.wholesalerVehicleB.day1        -INF      -1.00000E+11          .              .          
+wholesalerB.retailerB.wholesalerVehicleB.day2        -INF      -1.00000E+11          .              .          
+
+---- EQU eqn12  
+
+                     LOWER          LEVEL          UPPER         MARGINAL
+
+productA.day1          .              .              .             EPS         
+productA.day2          .              .              .             EPS         
+productB.day1          .              .              .             EPS         
+productB.day2          .              .              .             EPS         
+
+---- EQU eqn13  
+
+                                 LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.productA.day1          .              .              .             EPS         
+wholesalerA.productA.day2          .              .              .             EPS         
+wholesalerA.productB.day1          .              .              .             EPS         
+wholesalerA.productB.day2          .              .              .             EPS         
+wholesalerB.productA.day1          .              .              .             EPS         
+wholesalerB.productA.day2          .              .              .             EPS         
+wholesalerB.productB.day1          .              .              .             EPS         
+wholesalerB.productB.day2          .              .              .             EPS         
+
+---- EQU eqn14  
+
+                               LOWER          LEVEL          UPPER         MARGINAL
+
+retailerA.productA.day1        20.0000        20.0000        20.0000         EPS         
+retailerA.productA.day2        18.0000        18.0000        18.0000         EPS         
+retailerA.productB.day1        21.0000        21.0000        21.0000         EPS         
+retailerA.productB.day2        19.0000        19.0000        19.0000         EPS         
+retailerB.productA.day1        19.0000        19.0000        19.0000         EPS         
+retailerB.productA.day2        17.0000        17.0000        17.0000         EPS         
+retailerB.productB.day1        20.0000        20.0000        20.0000         EPS         
+retailerB.productB.day2        18.0000        18.0000        18.0000         EPS         
+
+---- EQU eqn15  
+
+                                                  LOWER          LEVEL          UPPER         MARGINAL
+
+retailerA.vehicleA.collection-centerA.day1        -INF         -266.6667          .              .          
+retailerA.vehicleA.collection-centerA.day2        -INF         -266.6667          .              .          
+retailerA.vehicleA.collection-centerB.day1        -INF         -400.0000          .              .          
+retailerA.vehicleA.collection-centerB.day2        -INF         -400.0000          .              .          
+retailerA.vehicleB.collection-centerA.day1        -INF         -300.0000          .              .          
+retailerA.vehicleB.collection-centerA.day2        -INF         -300.0000          .              .          
+retailerA.vehicleB.collection-centerB.day1        -INF         -450.0000          .              .          
+retailerA.vehicleB.collection-centerB.day2        -INF         -450.0000          .              .          
+retailerB.vehicleA.collection-centerA.day1        -INF             .              .              .          
+retailerB.vehicleA.collection-centerA.day2        -INF             .              .              .          
+retailerB.vehicleA.collection-centerB.day1        -INF             .              .              .          
+retailerB.vehicleA.collection-centerB.day2        -INF             .              .              .          
+retailerB.vehicleB.collection-centerA.day1        -INF             .              .              .          
+retailerB.vehicleB.collection-centerA.day2        -INF             .              .              .          
+retailerB.vehicleB.collection-centerB.day1        -INF             .              .              .          
+retailerB.vehicleB.collection-centerB.day2        -INF             .              .              .          
+
+---- EQU eqn16  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+vehicleC.collection-centerA.day1        -INF         -114.2857          .              .          
+vehicleC.collection-centerA.day2        -INF         -114.2857          .              .          
+vehicleC.collection-centerB.day1        -INF         -100.0000          .              .          
+vehicleC.collection-centerB.day2        -INF         -100.0000          .              .          
+vehicleD.collection-centerA.day1        -INF         -128.5714          .              .          
+vehicleD.collection-centerA.day2        -INF         -128.5714          .              .          
+vehicleD.collection-centerB.day1        -INF         -112.5000          .              .          
+vehicleD.collection-centerB.day2        -INF         -112.5000          .              .          
+
+---- EQU eqn17  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+vehicleA.collection-centerA.day1        -INF           10.0000        10.0000         EPS         
+vehicleA.collection-centerA.day2        -INF           10.0000        10.0000         EPS         
+vehicleA.collection-centerB.day1        -INF           10.0000        10.0000         EPS         
+vehicleA.collection-centerB.day2        -INF           10.0000        10.0000         EPS         
+vehicleB.collection-centerA.day1        -INF           10.0000        10.0000         EPS         
+vehicleB.collection-centerA.day2        -INF           10.0000        10.0000         EPS         
+vehicleB.collection-centerB.day1        -INF           10.0000        10.0000         EPS         
+vehicleB.collection-centerB.day2        -INF           10.0000        10.0000         EPS         
+
+---- EQU eqn18  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+vehicleC.collection-centerA.day1        -INF             .              .             EPS         
+vehicleC.collection-centerA.day2        -INF             .              .             EPS         
+vehicleC.collection-centerB.day1        -INF             .              .             EPS         
+vehicleC.collection-centerB.day2        -INF             .              .             EPS         
+vehicleD.collection-centerA.day1        -INF             .              .             EPS         
+vehicleD.collection-centerA.day2        -INF             .              .             EPS         
+vehicleD.collection-centerB.day1        -INF             .              .             EPS         
+vehicleD.collection-centerB.day2        -INF             .              .             EPS         
+
+---- EQU eqn19  
+
+                                                  LOWER          LEVEL          UPPER         MARGINAL
+
+collection-centerA.vehicleA.retailerA.day1        -INF      -9.999997E+6          .              .          
+collection-centerA.vehicleA.retailerA.day2        -INF      -9.999997E+6          .              .          
+collection-centerA.vehicleA.retailerB.day1        -INF      -1.000000E+7          .              .          
+collection-centerA.vehicleA.retailerB.day2        -INF      -1.000000E+7          .              .          
+collection-centerA.vehicleB.retailerA.day1        -INF      -9.999997E+6          .              .          
+collection-centerA.vehicleB.retailerA.day2        -INF      -9.999997E+6          .              .          
+collection-centerA.vehicleB.retailerB.day1        -INF      -1.000000E+7          .              .          
+collection-centerA.vehicleB.retailerB.day2        -INF      -1.000000E+7          .              .          
+collection-centerB.vehicleA.retailerA.day1        -INF      -9.999995E+6          .              .          
+collection-centerB.vehicleA.retailerA.day2        -INF      -9.999995E+6          .              .          
+collection-centerB.vehicleA.retailerB.day1        -INF      -1.000000E+7          .              .          
+collection-centerB.vehicleA.retailerB.day2        -INF      -1.000000E+7          .              .          
+collection-centerB.vehicleB.retailerA.day1        -INF      -9.999995E+6          .              .          
+collection-centerB.vehicleB.retailerA.day2        -INF      -9.999995E+6          .              .          
+collection-centerB.vehicleB.retailerB.day1        -INF      -1.000000E+7          .              .          
+collection-centerB.vehicleB.retailerB.day2        -INF      -1.000000E+7          .              .          
+
+---- EQU eqn20  
+
+                          LOWER          LEVEL          UPPER         MARGINAL
+
+day1.raw-materialA          .              .              .             EPS         
+day1.raw-materialB          .              .              .             EPS         
+day2.raw-materialA          .              .              .             EPS         
+day2.raw-materialB          .              .              .             EPS         
+
+---- EQU eqn21  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+supplierA.vehicle-supplierA.day1        -INF           -6.7308          .              .          
+supplierA.vehicle-supplierA.day2        -INF           -6.7308          .              .          
+supplierA.vehicle-supplierB.day1        -INF           -7.6923          .              .          
+supplierA.vehicle-supplierB.day2        -INF           -7.6923          .              .          
+supplierB.vehicle-supplierA.day1        -INF           -6.2500          .              .          
+supplierB.vehicle-supplierA.day2        -INF           -6.2500          .              .          
+supplierB.vehicle-supplierB.day1        -INF           -7.1429          .              .          
+supplierB.vehicle-supplierB.day2        -INF           -7.1429          .              .          
+
+---- EQU eqn22  
+
+                                                           LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.factoryVehicleA.wholesalerVehicleA.day1        -INF             .              .             EPS         
+wholesalerA.factoryVehicleA.wholesalerVehicleA.day2        -INF             .              .              .          
+wholesalerA.factoryVehicleA.wholesalerVehicleB.day1        -INF             .              .             EPS         
+wholesalerA.factoryVehicleA.wholesalerVehicleB.day2        -INF             .              .              .          
+wholesalerA.factoryVehicleB.wholesalerVehicleA.day1        -INF             .              .              .          
+wholesalerA.factoryVehicleB.wholesalerVehicleA.day2        -INF             .              .              .          
+wholesalerA.factoryVehicleB.wholesalerVehicleB.day1        -INF             .              .              .          
+wholesalerA.factoryVehicleB.wholesalerVehicleB.day2        -INF             .              .              .          
+wholesalerB.factoryVehicleA.wholesalerVehicleA.day1        -INF           -0.2316          .              .          
+wholesalerB.factoryVehicleA.wholesalerVehicleA.day2        -INF           -0.2316          .              .          
+wholesalerB.factoryVehicleA.wholesalerVehicleB.day1        -INF           -0.2316          .              .          
+wholesalerB.factoryVehicleA.wholesalerVehicleB.day2        -INF           -0.2316          .              .          
+wholesalerB.factoryVehicleB.wholesalerVehicleA.day1        -INF           -0.2624          .              .          
+wholesalerB.factoryVehicleB.wholesalerVehicleA.day2        -INF           -0.2624          .              .          
+wholesalerB.factoryVehicleB.wholesalerVehicleB.day1        -INF           -0.2624          .              .          
+wholesalerB.factoryVehicleB.wholesalerVehicleB.day2        -INF           -0.2624          .              .          
+
+---- EQU eqn23  
+
+                                                     LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.retailerA.wholesalerVehicleA.day1        -INF             .              .             EPS         
+wholesalerA.retailerA.wholesalerVehicleA.day2        -INF             .              .             EPS         
+wholesalerA.retailerA.wholesalerVehicleB.day1        -INF             .              .             EPS         
+wholesalerA.retailerA.wholesalerVehicleB.day2        -INF             .              .             EPS         
+wholesalerA.retailerB.wholesalerVehicleA.day1        -INF          -14.8148          .              .          
+wholesalerA.retailerB.wholesalerVehicleA.day2        -INF          -14.8148          .              .          
+wholesalerA.retailerB.wholesalerVehicleB.day1        -INF           -7.4074          .              .          
+wholesalerA.retailerB.wholesalerVehicleB.day2        -INF           -7.4074          .              .          
+wholesalerB.retailerA.wholesalerVehicleA.day1        -INF           -7.4074          .              .          
+wholesalerB.retailerA.wholesalerVehicleA.day2        -INF           -7.4074          .              .          
+wholesalerB.retailerA.wholesalerVehicleB.day1        -INF           -3.7037          .              .          
+wholesalerB.retailerA.wholesalerVehicleB.day2        -INF           -3.7037          .              .          
+wholesalerB.retailerB.wholesalerVehicleA.day1        -INF             .              .             EPS         
+wholesalerB.retailerB.wholesalerVehicleA.day2        -INF             .              .             EPS         
+wholesalerB.retailerB.wholesalerVehicleB.day1        -INF             .              .             EPS         
+wholesalerB.retailerB.wholesalerVehicleB.day2        -INF             .              .             EPS         
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z                 -INF        12160.0000        +INF             .          
+
+---- VAR xij  quantity shipped from plant i to market j
+
+                              LOWER          LEVEL          UPPER         MARGINAL
+
+NAmerica.raw-materialA          .            10.0000        +INF             .          
+NAmerica.raw-materialB          .              .            +INF           51.0000      
+SAmerica.raw-materialA          .             2.0000        +INF             .          
+SAmerica.raw-materialB          .             8.0000        +INF             .          
+
+---- VAR w  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+supplierA.vehicle-supplierA.day1          .             0.0962        +INF             .          
+supplierA.vehicle-supplierA.day2          .             0.0962        +INF             .          
+supplierA.vehicle-supplierB.day1          .             0.0962        +INF             .          
+supplierA.vehicle-supplierB.day2          .             0.0962        +INF             .          
+supplierB.vehicle-supplierA.day1          .             0.0893        +INF             .          
+supplierB.vehicle-supplierA.day2          .             0.0893        +INF             .          
+supplierB.vehicle-supplierB.day1          .             0.0893        +INF             .          
+supplierB.vehicle-supplierB.day2          .             0.0893        +INF             .          
+
+---- VAR w1  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.factoryVehicleA.day1          .              .            +INF             .          
+wholesalerA.factoryVehicleA.day2          .              .            +INF            EPS         
+wholesalerA.factoryVehicleB.day1          .              .            +INF            EPS         
+wholesalerA.factoryVehicleB.day2          .              .            +INF            EPS         
+wholesalerB.factoryVehicleA.day1          .             0.0031        +INF             .          
+wholesalerB.factoryVehicleA.day2          .             0.0031        +INF             .          
+wholesalerB.factoryVehicleB.day1          .             0.0031        +INF             .          
+wholesalerB.factoryVehicleB.day2          .             0.0031        +INF             .          
+
+---- VAR w11  
+
+                                                     LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.retailerA.wholesalerVehicleA.day1          .              .            +INF             .          
+wholesalerA.retailerA.wholesalerVehicleA.day2          .              .            +INF             .          
+wholesalerA.retailerA.wholesalerVehicleB.day1          .              .            +INF             .          
+wholesalerA.retailerA.wholesalerVehicleB.day2          .              .            +INF             .          
+wholesalerA.retailerB.wholesalerVehicleA.day1          .             0.3704        +INF             .          
+wholesalerA.retailerB.wholesalerVehicleA.day2          .             0.3704        +INF             .          
+wholesalerA.retailerB.wholesalerVehicleB.day1          .             0.3704        +INF             .          
+wholesalerA.retailerB.wholesalerVehicleB.day2          .             0.3704        +INF             .          
+wholesalerB.retailerA.wholesalerVehicleA.day1          .             0.1852        +INF             .          
+wholesalerB.retailerA.wholesalerVehicleA.day2          .             0.1852        +INF             .          
+wholesalerB.retailerA.wholesalerVehicleB.day1          .             0.1852        +INF             .          
+wholesalerB.retailerA.wholesalerVehicleB.day2          .             0.1852        +INF             .          
+wholesalerB.retailerB.wholesalerVehicleA.day1          .              .            +INF             .          
+wholesalerB.retailerB.wholesalerVehicleA.day2          .              .            +INF             .          
+wholesalerB.retailerB.wholesalerVehicleB.day1          .              .            +INF             .          
+wholesalerB.retailerB.wholesalerVehicleB.day2          .              .            +INF             .          
+
+---- VAR y111  number of product p transported by vehicle g from wholesaller b to retailer e on day t
+
+                                                              LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.retailerA.wholesalerVehicleA.productA.day1          .              .            +INF             .          
+wholesalerA.retailerA.wholesalerVehicleA.productA.day2          .              .            +INF             .          
+wholesalerA.retailerA.wholesalerVehicleA.productB.day1          .              .            +INF             .          
+wholesalerA.retailerA.wholesalerVehicleA.productB.day2          .              .            +INF             .          
+wholesalerA.retailerA.wholesalerVehicleB.productA.day1          .              .            +INF            EPS         
+wholesalerA.retailerA.wholesalerVehicleB.productA.day2          .              .            +INF            EPS         
+wholesalerA.retailerA.wholesalerVehicleB.productB.day1          .              .            +INF            EPS         
+wholesalerA.retailerA.wholesalerVehicleB.productB.day2          .              .            +INF            EPS         
+wholesalerA.retailerB.wholesalerVehicleA.productA.day1          .              .            +INF            EPS         
+wholesalerA.retailerB.wholesalerVehicleA.productA.day2          .              .            +INF            EPS         
+wholesalerA.retailerB.wholesalerVehicleA.productB.day1          .              .            +INF            EPS         
+wholesalerA.retailerB.wholesalerVehicleA.productB.day2          .              .            +INF            EPS         
+wholesalerA.retailerB.wholesalerVehicleB.productA.day1          .              .            +INF            EPS         
+wholesalerA.retailerB.wholesalerVehicleB.productA.day2          .              .            +INF            EPS         
+wholesalerA.retailerB.wholesalerVehicleB.productB.day1          .              .            +INF            EPS         
+wholesalerA.retailerB.wholesalerVehicleB.productB.day2          .              .            +INF            EPS         
+wholesalerB.retailerA.wholesalerVehicleA.productA.day1          .              .            +INF             .          
+wholesalerB.retailerA.wholesalerVehicleA.productA.day2          .              .            +INF             .          
+wholesalerB.retailerA.wholesalerVehicleA.productB.day1          .              .            +INF             .          
+wholesalerB.retailerA.wholesalerVehicleA.productB.day2          .              .            +INF             .          
+wholesalerB.retailerA.wholesalerVehicleB.productA.day1          .              .            +INF            EPS         
+wholesalerB.retailerA.wholesalerVehicleB.productA.day2          .              .            +INF            EPS         
+wholesalerB.retailerA.wholesalerVehicleB.productB.day1          .              .            +INF            EPS         
+wholesalerB.retailerA.wholesalerVehicleB.productB.day2          .              .            +INF            EPS         
+wholesalerB.retailerB.wholesalerVehicleA.productA.day1          .              .            +INF            EPS         
+wholesalerB.retailerB.wholesalerVehicleA.productA.day2          .              .            +INF            EPS         
+wholesalerB.retailerB.wholesalerVehicleA.productB.day1          .              .            +INF            EPS         
+wholesalerB.retailerB.wholesalerVehicleA.productB.day2          .              .            +INF            EPS         
+wholesalerB.retailerB.wholesalerVehicleB.productA.day1          .              .            +INF            EPS         
+wholesalerB.retailerB.wholesalerVehicleB.productA.day2          .              .            +INF            EPS         
+wholesalerB.retailerB.wholesalerVehicleB.productB.day1          .              .            +INF            EPS         
+wholesalerB.retailerB.wholesalerVehicleB.productB.day2          .              .            +INF            EPS         
+
+---- VAR bo  
+
+                               LOWER          LEVEL          UPPER         MARGINAL
+
+retailerA.productA.day1          .            20.0000        +INF             .          
+retailerA.productA.day2          .            18.0000        +INF             .          
+retailerA.productB.day1          .            21.0000        +INF             .          
+retailerA.productB.day2          .            19.0000        +INF             .          
+retailerB.productA.day1          .            19.0000        +INF             .          
+retailerB.productA.day2          .            17.0000        +INF             .          
+retailerB.productB.day1          .            20.0000        +INF             .          
+retailerB.productB.day2          .            18.0000        +INF             .          
+
+---- VAR u1  
+
+                          LOWER          LEVEL          UPPER         MARGINAL
+
+raw-materialA.day1          .              .            +INF            EPS         
+raw-materialA.day2          .              .            +INF             .          
+raw-materialB.day1          .              .            +INF            EPS         
+raw-materialB.day2          .              .            +INF             .          
+
+---- VAR u_pt  
+
+                     LOWER          LEVEL          UPPER         MARGINAL
+
+productA.day1          .              .            +INF            EPS         
+productA.day2          .              .            +INF             .          
+productB.day1          .              .            +INF            EPS         
+productB.day2          .              .            +INF             .          
+
+---- VAR u11  
+
+                                 LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.productA.day1          .              .            +INF            EPS         
+wholesalerA.productA.day2          .              .            +INF            EPS         
+wholesalerA.productB.day1          .              .            +INF            EPS         
+wholesalerA.productB.day2          .              .            +INF            EPS         
+wholesalerB.productA.day1          .              .            +INF            EPS         
+wholesalerB.productA.day2          .              .            +INF            EPS         
+wholesalerB.productB.day1          .              .            +INF            EPS         
+wholesalerB.productB.day2          .              .            +INF            EPS         
+
+---- VAR u111  storage inventory or customer e from product p on day t
+
+                               LOWER          LEVEL          UPPER         MARGINAL
+
+retailerA.productA.day1          .              .            +INF            EPS         
+retailerA.productA.day2          .              .            +INF            EPS         
+retailerA.productB.day1          .              .            +INF            EPS         
+retailerA.productB.day2          .              .            +INF            EPS         
+retailerB.productA.day1          .              .            +INF            EPS         
+retailerB.productA.day2          .              .            +INF            EPS         
+retailerB.productB.day1          .              .            +INF            EPS         
+retailerB.productB.day2          .              .            +INF            EPS         
+
+---- VAR wb  
+
+                                                  LOWER          LEVEL          UPPER         MARGINAL
+
+retailerA.vehicleA.collection-centerA.day1          .             3.3333        +INF             .          
+retailerA.vehicleA.collection-centerA.day2          .             3.3333        +INF             .          
+retailerA.vehicleA.collection-centerB.day1          .             5.0000        +INF             .          
+retailerA.vehicleA.collection-centerB.day2          .             5.0000        +INF             .          
+retailerA.vehicleB.collection-centerA.day1          .             3.3333        +INF             .          
+retailerA.vehicleB.collection-centerA.day2          .             3.3333        +INF             .          
+retailerA.vehicleB.collection-centerB.day1          .             5.0000        +INF             .          
+retailerA.vehicleB.collection-centerB.day2          .             5.0000        +INF             .          
+retailerB.vehicleA.collection-centerA.day1          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerA.day2          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerB.day1          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerB.day2          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerA.day1          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerA.day2          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerB.day1          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerB.day2          .              .            +INF            EPS         
+
+---- VAR wb1  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+vehicleC.collection-centerA.day1          .             1.4286        +INF             .          
+vehicleC.collection-centerA.day2          .             1.4286        +INF             .          
+vehicleC.collection-centerB.day1          .             1.2500        +INF             .          
+vehicleC.collection-centerB.day2          .             1.2500        +INF             .          
+vehicleD.collection-centerA.day1          .             1.4286        +INF             .          
+vehicleD.collection-centerA.day2          .             1.4286        +INF             .          
+vehicleD.collection-centerB.day1          .             1.2500        +INF             .          
+vehicleD.collection-centerB.day2          .             1.2500        +INF             .          
+
+---- VAR yb  amount of p product sent retailer e to collection-center j on day t using vehicle i
+
+                                                           LOWER          LEVEL          UPPER         MARGINAL
+
+retailerA.vehicleA.collection-centerA.productA.day1          .              .            +INF            EPS         
+retailerA.vehicleA.collection-centerA.productA.day2          .              .            +INF            EPS         
+retailerA.vehicleA.collection-centerA.productB.day1          .              .            +INF            EPS         
+retailerA.vehicleA.collection-centerA.productB.day2          .              .            +INF            EPS         
+retailerA.vehicleA.collection-centerB.productA.day1          .              .            +INF            EPS         
+retailerA.vehicleA.collection-centerB.productA.day2          .              .            +INF            EPS         
+retailerA.vehicleA.collection-centerB.productB.day1          .              .            +INF            EPS         
+retailerA.vehicleA.collection-centerB.productB.day2          .              .            +INF            EPS         
+retailerA.vehicleB.collection-centerA.productA.day1          .              .            +INF            EPS         
+retailerA.vehicleB.collection-centerA.productA.day2          .              .            +INF            EPS         
+retailerA.vehicleB.collection-centerA.productB.day1          .              .            +INF            EPS         
+retailerA.vehicleB.collection-centerA.productB.day2          .              .            +INF            EPS         
+retailerA.vehicleB.collection-centerB.productA.day1          .              .            +INF            EPS         
+retailerA.vehicleB.collection-centerB.productA.day2          .              .            +INF            EPS         
+retailerA.vehicleB.collection-centerB.productB.day1          .              .            +INF            EPS         
+retailerA.vehicleB.collection-centerB.productB.day2          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerA.productA.day1          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerA.productA.day2          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerA.productB.day1          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerA.productB.day2          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerB.productA.day1          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerB.productA.day2          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerB.productB.day1          .              .            +INF            EPS         
+retailerB.vehicleA.collection-centerB.productB.day2          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerA.productA.day1          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerA.productA.day2          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerA.productB.day1          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerA.productB.day2          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerB.productA.day1          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerB.productA.day2          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerB.productB.day1          .              .            +INF            EPS         
+retailerB.vehicleB.collection-centerB.productB.day2          .              .            +INF            EPS         
+
+---- VAR yb1  
+
+                                                      LOWER          LEVEL          UPPER         MARGINAL
+
+vehicleC.collection-centerA.raw-materialA.day1          .              .            +INF             .          
+vehicleC.collection-centerA.raw-materialA.day2          .              .            +INF            EPS         
+vehicleC.collection-centerA.raw-materialB.day1          .              .            +INF             .          
+vehicleC.collection-centerA.raw-materialB.day2          .              .            +INF             .          
+vehicleC.collection-centerB.raw-materialA.day1          .              .            +INF            EPS         
+vehicleC.collection-centerB.raw-materialA.day2          .              .            +INF             .          
+vehicleC.collection-centerB.raw-materialB.day1          .              .            +INF            EPS         
+vehicleC.collection-centerB.raw-materialB.day2          .              .            +INF            EPS         
+vehicleD.collection-centerA.raw-materialA.day1          .              .            +INF            EPS         
+vehicleD.collection-centerA.raw-materialA.day2          .              .            +INF            EPS         
+vehicleD.collection-centerA.raw-materialB.day1          .              .            +INF            EPS         
+vehicleD.collection-centerA.raw-materialB.day2          .              .            +INF            EPS         
+vehicleD.collection-centerB.raw-materialA.day1          .              .            +INF            EPS         
+vehicleD.collection-centerB.raw-materialA.day2          .              .            +INF            EPS         
+vehicleD.collection-centerB.raw-materialB.day1          .              .            +INF            EPS         
+vehicleD.collection-centerB.raw-materialB.day2          .              .            +INF            EPS         
+
+---- VAR y  m material sent by v vahicle from a supplier to the factory on t day
+
+                                                      LOWER          LEVEL          UPPER         MARGINAL
+
+supplierA.vehicle-supplierA.raw-materialA.day1          .              .            +INF            EPS         
+supplierA.vehicle-supplierA.raw-materialA.day2          .              .            +INF            EPS         
+supplierA.vehicle-supplierA.raw-materialB.day1          .              .            +INF            EPS         
+supplierA.vehicle-supplierA.raw-materialB.day2          .              .            +INF            EPS         
+supplierA.vehicle-supplierB.raw-materialA.day1          .              .            +INF            EPS         
+supplierA.vehicle-supplierB.raw-materialA.day2          .              .            +INF            EPS         
+supplierA.vehicle-supplierB.raw-materialB.day1          .              .            +INF            EPS         
+supplierA.vehicle-supplierB.raw-materialB.day2          .              .            +INF            EPS         
+supplierB.vehicle-supplierA.raw-materialA.day1          .              .            +INF            EPS         
+supplierB.vehicle-supplierA.raw-materialA.day2          .              .            +INF            EPS         
+supplierB.vehicle-supplierA.raw-materialB.day1          .              .            +INF            EPS         
+supplierB.vehicle-supplierA.raw-materialB.day2          .              .            +INF            EPS         
+supplierB.vehicle-supplierB.raw-materialA.day1          .              .            +INF            EPS         
+supplierB.vehicle-supplierB.raw-materialA.day2          .              .            +INF            EPS         
+supplierB.vehicle-supplierB.raw-materialB.day1          .              .            +INF            EPS         
+supplierB.vehicle-supplierB.raw-materialB.day2          .              .            +INF            EPS         
+
+---- VAR y1  
+
+                     LOWER          LEVEL          UPPER         MARGINAL
+
+productA.day1          .              .            +INF             .          
+productA.day2          .              .            +INF            EPS         
+productB.day1          .              .            +INF             .          
+productB.day2          .              .            +INF            EPS         
+
+---- VAR y11  
+
+                                                    LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.wholesalerVehicleA.productA.day1          .              .            +INF             .          
+wholesalerA.wholesalerVehicleA.productA.day2          .              .            +INF            EPS         
+wholesalerA.wholesalerVehicleA.productB.day1          .              .            +INF             .          
+wholesalerA.wholesalerVehicleA.productB.day2          .              .            +INF            EPS         
+wholesalerA.wholesalerVehicleB.productA.day1          .              .            +INF             .          
+wholesalerA.wholesalerVehicleB.productA.day2          .              .            +INF            EPS         
+wholesalerA.wholesalerVehicleB.productB.day1          .              .            +INF            EPS         
+wholesalerA.wholesalerVehicleB.productB.day2          .              .            +INF            EPS         
+wholesalerB.wholesalerVehicleA.productA.day1          .              .            +INF            EPS         
+wholesalerB.wholesalerVehicleA.productA.day2          .              .            +INF            EPS         
+wholesalerB.wholesalerVehicleA.productB.day1          .              .            +INF            EPS         
+wholesalerB.wholesalerVehicleA.productB.day2          .              .            +INF            EPS         
+wholesalerB.wholesalerVehicleB.productA.day1          .              .            +INF            EPS         
+wholesalerB.wholesalerVehicleB.productA.day2          .              .            +INF            EPS         
+wholesalerB.wholesalerVehicleB.productB.day1          .              .            +INF            EPS         
+wholesalerB.wholesalerVehicleB.productB.day2          .              .            +INF            EPS         
+
+---- VAR yi  plant i on or off
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+NAmerica          .             1.0000         1.0000      5640.0000      
+SAmerica          .             1.0000         1.0000      4500.0000      
+
+---- VAR x  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+supplierA.vehicle-supplierA.day1          .             1.0000         1.0000         EPS         
+supplierA.vehicle-supplierA.day2          .             1.0000         1.0000         EPS         
+supplierA.vehicle-supplierB.day1          .             1.0000         1.0000         EPS         
+supplierA.vehicle-supplierB.day2          .             1.0000         1.0000         EPS         
+supplierB.vehicle-supplierA.day1          .             1.0000         1.0000         EPS         
+supplierB.vehicle-supplierA.day2          .             1.0000         1.0000         EPS         
+supplierB.vehicle-supplierB.day1          .             1.0000         1.0000         EPS         
+supplierB.vehicle-supplierB.day2          .             1.0000         1.0000         EPS         
+
+---- VAR x1  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.factoryVehicleA.day1          .             1.0000         1.0000         EPS         
+wholesalerA.factoryVehicleA.day2          .             1.0000         1.0000         EPS         
+wholesalerA.factoryVehicleB.day1          .             1.0000         1.0000         EPS         
+wholesalerA.factoryVehicleB.day2          .             1.0000         1.0000         EPS         
+wholesalerB.factoryVehicleA.day1          .             1.0000         1.0000         EPS         
+wholesalerB.factoryVehicleA.day2          .             1.0000         1.0000         EPS         
+wholesalerB.factoryVehicleB.day1          .             1.0000         1.0000         EPS         
+wholesalerB.factoryVehicleB.day2          .             1.0000         1.0000         EPS         
+
+---- VAR x11  
+
+                                                     LOWER          LEVEL          UPPER         MARGINAL
+
+wholesalerA.retailerA.wholesalerVehicleA.day1          .             1.0000         1.0000         EPS         
+wholesalerA.retailerA.wholesalerVehicleA.day2          .             1.0000         1.0000         EPS         
+wholesalerA.retailerA.wholesalerVehicleB.day1          .             1.0000         1.0000         EPS         
+wholesalerA.retailerA.wholesalerVehicleB.day2          .             1.0000         1.0000         EPS         
+wholesalerA.retailerB.wholesalerVehicleA.day1          .             1.0000         1.0000         EPS         
+wholesalerA.retailerB.wholesalerVehicleA.day2          .             1.0000         1.0000         EPS         
+wholesalerA.retailerB.wholesalerVehicleB.day1          .             1.0000         1.0000         EPS         
+wholesalerA.retailerB.wholesalerVehicleB.day2          .             1.0000         1.0000         EPS         
+wholesalerB.retailerA.wholesalerVehicleA.day1          .             1.0000         1.0000         EPS         
+wholesalerB.retailerA.wholesalerVehicleA.day2          .             1.0000         1.0000         EPS         
+wholesalerB.retailerA.wholesalerVehicleB.day1          .             1.0000         1.0000         EPS         
+wholesalerB.retailerA.wholesalerVehicleB.day2          .             1.0000         1.0000         EPS         
+wholesalerB.retailerB.wholesalerVehicleA.day1          .             1.0000         1.0000         EPS         
+wholesalerB.retailerB.wholesalerVehicleA.day2          .             1.0000         1.0000         EPS         
+wholesalerB.retailerB.wholesalerVehicleB.day1          .             1.0000         1.0000         EPS         
+wholesalerB.retailerB.wholesalerVehicleB.day2          .             1.0000         1.0000         EPS         
+
+---- VAR xb  
+
+                                                  LOWER          LEVEL          UPPER         MARGINAL
+
+retailerA.vehicleA.collection-centerA.day1          .             1.0000         1.0000         EPS         
+retailerA.vehicleA.collection-centerA.day2          .             1.0000         1.0000         EPS         
+retailerA.vehicleA.collection-centerB.day1          .             1.0000         1.0000         EPS         
+retailerA.vehicleA.collection-centerB.day2          .             1.0000         1.0000         EPS         
+retailerA.vehicleB.collection-centerA.day1          .             1.0000         1.0000         EPS         
+retailerA.vehicleB.collection-centerA.day2          .             1.0000         1.0000         EPS         
+retailerA.vehicleB.collection-centerB.day1          .             1.0000         1.0000         EPS         
+retailerA.vehicleB.collection-centerB.day2          .             1.0000         1.0000         EPS         
+retailerB.vehicleA.collection-centerA.day1          .             1.0000         1.0000         EPS         
+retailerB.vehicleA.collection-centerA.day2          .             1.0000         1.0000         EPS         
+retailerB.vehicleA.collection-centerB.day1          .             1.0000         1.0000         EPS         
+retailerB.vehicleA.collection-centerB.day2          .             1.0000         1.0000         EPS         
+retailerB.vehicleB.collection-centerA.day1          .             1.0000         1.0000         EPS         
+retailerB.vehicleB.collection-centerA.day2          .             1.0000         1.0000         EPS         
+retailerB.vehicleB.collection-centerB.day1          .             1.0000         1.0000         EPS         
+retailerB.vehicleB.collection-centerB.day2          .             1.0000         1.0000         EPS         
+
+---- VAR xb1  
+
+                                        LOWER          LEVEL          UPPER         MARGINAL
+
+vehicleC.collection-centerA.day1          .             1.0000         1.0000         EPS         
+vehicleC.collection-centerA.day2          .             1.0000         1.0000         EPS         
+vehicleC.collection-centerB.day1          .             1.0000         1.0000         EPS         
+vehicleC.collection-centerB.day2          .             1.0000         1.0000         EPS         
+vehicleD.collection-centerA.day1          .             1.0000         1.0000         EPS         
+vehicleD.collection-centerA.day2          .             1.0000         1.0000         EPS         
+vehicleD.collection-centerB.day1          .             1.0000         1.0000         EPS         
+vehicleD.collection-centerB.day2          .             1.0000         1.0000         EPS         
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        0.062 SECONDS      4 MB  39.2.0 e0c5072f WEX-WEI
+
+
+USER: GAMS Demo license for TAWFIQ HAFIZI            G220605|0002CO-GEN
+      Military Institute, Bangladesh                           DL068940
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\tawfiq\Desktop\gams\others\small.gms
+Output     C:\Users\tawfiq\Desktop\gams\others\small.lst

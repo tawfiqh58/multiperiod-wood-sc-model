@@ -1,0 +1,41 @@
+const lightboxBackground = document.createElement('div');
+lightboxBackground.id = "lightbox-background"
+
+document.body.appendChild(lightboxBackground);
+
+const figures = document.querySelectorAll('.lightbox-figure');
+
+figures.forEach(figure => {
+    figure.addEventListener('click', e => {
+        console.log('Clicked!');
+        lightboxBackground.classList.add('active');
+        while (lightboxBackground.firstChild) {
+            lightboxBackground.firstChild.remove();
+        }
+        
+        const fig = document.createElement('div');
+        fig.id    = "lightboxFigure";
+
+        const newImg = document.createElement('img');
+        newImg.id = 'lightboxImage';
+        
+        const newCap = document.createElement('figcaption');
+        newCap.id = 'lightboxCaption';
+        newCap.classList.add('gams-site');
+
+        const oldImg = figure.querySelector('img');
+        newImg.src = oldImg.src;
+
+        const oldCap = figure.querySelector('figcaption');
+        newCap.innerHTML = oldCap.innerHTML;
+
+        lightboxBackground.appendChild(fig);
+        fig.appendChild(newImg);
+        fig.appendChild(newCap);
+
+    })
+})
+
+lightboxBackground.addEventListener('click', e => {
+    lightboxBackground.classList.remove('active');
+})

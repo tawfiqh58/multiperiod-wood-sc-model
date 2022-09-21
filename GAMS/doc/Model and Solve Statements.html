@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0051)https://www.gams.com/latest/docs/UG_ModelSolve.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="generator" content="Doxygen">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--PROJECTNAME GAMS Documentation-->
+<title>Model and Solve Statements</title>
+<!--<link href="./style/tabs.css" rel="stylesheet" type="text/css"/>-->
+<!--<script type="text/javascript" src="./style/jquery.js"></script>-->
+<!--<script type="text/javascript" src="./style/dynsections.js"></script>-->
+<script type="text/x-mathjax-config;executed=true">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/SVG"],
+});
+</script>
+<script type="text/javascript" async="async" src="./Model and Solve Statements_files/MathJax.js.download"></script>
+<script type="text/javascript" language="javascript" src="./Model and Solve Statements_files/prism.js.download"></script>
+<link href="./Model and Solve Statements_files/prism.css" rel="stylesheet" type="text/css">
+<link href="./Model and Solve Statements_files/stylesheet.css" rel="stylesheet" type="text/css" id="gamsstylesheet">
+<link href="./Model and Solve Statements_files/navtree.css" rel="stylesheet" type="text/css">
+<link href="./Model and Solve Statements_files/icono.min.css" rel="stylesheet" type="text/css">
+
+<link rel="apple-touch-icon" sizes="57x57" href="https://www.gams.com/img/favicons/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="https://www.gams.com/img/favicons/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="https://www.gams.com/img/favicons/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="https://www.gams.com/img/favicons/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="https://www.gams.com/img/favicons/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="https://www.gams.com/img/favicons/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="https://www.gams.com/img/favicons/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="https://www.gams.com/img/favicons/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://www.gams.com/img/favicons/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="https://www.gams.com/img/favicons/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.gams.com/img/favicons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="https://www.gams.com/img/favicons/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.gams.com/img/favicons/favicon-16x16.png">
+<link rel="manifest" href="https://www.gams.com/img/favicons/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+
+
+
+
+<style type="text/css">.MathJax_Preview {color: #888; display: contents}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">.MathJax_SVG_Display {text-align: center; margin: 1em 0em; position: relative; display: table-cell; text-indent: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; width: 1000em; padding: 1em 0 ! important}
+.MathJax_SVG .MJX-monospace {font-family: monospace}
+.MathJax_SVG .MJX-sans-serif {font-family: sans-serif}
+#MathJax_SVG_Tooltip {background-color: InfoBackground; color: InfoText; border: 1px solid black; box-shadow: 2px 2px 5px #AAAAAA; -webkit-box-shadow: 2px 2px 5px #AAAAAA; -moz-box-shadow: 2px 2px 5px #AAAAAA; -khtml-box-shadow: 2px 2px 5px #AAAAAA; padding: 3px 4px; z-index: 401; position: absolute; left: 0; top: 0; width: auto; height: auto; display: none}
+.MathJax_SVG {display: inline; font-style: normal; font-weight: normal; line-height: normal; font-size: 100%; font-size-adjust: none; text-indent: 0; text-align: left; text-transform: none; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0; min-height: 0; border: 0; padding: 0; margin: 0}
+.MathJax_SVG * {transition: none; -webkit-transition: none; -moz-transition: none; -ms-transition: none; -o-transition: none}
+.MathJax_SVG > div {display: inline-block}
+.mjx-svg-href {fill: blue; stroke: blue}
+.MathJax_SVG_Processing {visibility: hidden; position: absolute; top: 0; left: 0; width: 0; height: 0; overflow: hidden; display: block!important}
+.MathJax_SVG_Processed {display: none!important}
+.MathJax_SVG_test {font-style: normal; font-weight: normal; font-size: 100%; font-size-adjust: none; text-indent: 0; text-transform: none; letter-spacing: normal; word-spacing: normal; overflow: hidden; height: 1px}
+.MathJax_SVG_test.mjx-test-display {display: table!important}
+.MathJax_SVG_test.mjx-test-inline {display: inline!important; margin-right: -1px}
+.MathJax_SVG_test.mjx-test-default {display: block!important; clear: both}
+.MathJax_SVG_ex_box {display: inline-block!important; position: absolute; overflow: hidden; min-height: 0; max-height: none; padding: 0; border: 0; margin: 0; width: 1px; height: 60ex}
+.mjx-test-inline .MathJax_SVG_left_box {display: inline-block; width: 0; float: left}
+.mjx-test-inline .MathJax_SVG_right_box {display: inline-block; width: 0; float: right}
+.mjx-test-display .MathJax_SVG_right_box {display: table-cell!important; width: 10000em!important; min-width: 0; max-width: none; padding: 0; border: 0; margin: 0}
+</style></head>
+<body class="doc-page" cz-shortcut-listen="true" data-new-gr-c-s-check-loaded="14.1062.0" data-gr-ext-installed="">
+<header class="topnav" id="menu-area">
+    
+
+
+
+
+
+  <link rel="stylesheet" href="./Model and Solve Statements_files/custom.min.ffd325d5374c07dc56b06f7860b0dbcd78ce97425d45e8129e767c003c3f9d22.css">
+
+  <style>
+    .row {
+      flex-wrap: unset;
+    }
+
+  .modal-backdrop {
+    z-index: 100;
+  }
+
+  </style>
+
+
+<div class="gams-site">
+  <nav id="gams-nav" class="navbar navbar-expand-xl navbar-light bg-white py-2 px-2">
+      
+    <div class="container px-0">
+    
+      <a class="navbar-brand p-0" href="https://www.gams.com/">
+          <img id="gams-logo" src="./Model and Solve Statements_files/gams_logo.svg" alt="" width="250">
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse flex-column" id="navbarNavDropdown">
+          
+          <ul id="top-buttons" class="navbar-nav flex-row ml-auto">
+            
+            <li class="nav-item ">
+            
+              <a href="https://www.gams.com/try_gams" id="navTryBtn" style="" class="top-button btn btn-gams-light-orange ">
+                <strong>FREE DEMO</strong>
+              </a>
+            </li>
+            
+            
+            <li class="nav-item ">
+              <button id="searchBtn" type="button" style="" class="top-button btn btn-secondary ml-2 " data-toggle="modal" data-target="#uni_searchModal" aria-label="Search Button">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18px" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> 
+                  <strong> SEARCH</strong>
+              </button>
+            </li>
+          
+          </ul>
+          
+          
+          <ul class="navbar-nav ml-auto">
+            
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Products</a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="https://www.gams.com/products/gams/gams-language"> GAMS - The Modeling Language</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/sales/miro_facts/"> GAMS MIRO</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/sales/engine_facts/"> GAMS Engine</a></li></ul>
+            </li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Documentation</a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="https://www.gams.com/latest/docs/"> GAMS</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/miro/"> MIRO</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/engine"> Engine</a></li></ul>
+            </li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Download</a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="https://www.gams.com/download/"> GAMS</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/miro/download.html"> MIRO</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/engine/installation.html"> Engine</a></li></ul>
+            </li>
+            
+            
+            <li class="nav-item">
+              <a class="nav-link" href="https://www.gams.com/support">Support</a>
+            </li><li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sales</a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="https://www.gams.com/sales/pricing_regular/"> Regular Price List</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/sales/pricing_academic/"> Academic Price List</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/buy_gams/"> Get a Quote</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/sales/maintenance/"> Get Maintenance</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/sales/extended-support"> Buy Extended Support</a></li></ul>
+            </li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Community</a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="https://www.gams.com/newsletter/signup"> Sign-up for our Newsletter</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/stories"> Case Studies</a></li>
+                <li><a class="dropdown-item" href="https://forum.gamsworld.org/"> The GAMSWORLD Forum <svg xmlns="http://www.w3.org/2000/svg" width="24" height="15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/conferences"> Meet us at a Conference</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/blog"> Read our GAMS Blog</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/webinars"> Visit a GAMS Webinar</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/courses"> Take a GAMS Course</a></li></ul>
+            </li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">About Us</a>
+              <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="https://www.gams.com/about/company"> Company Information</a></li>
+                <li><a class="dropdown-item" href="https://www.gams.com/team"> The GAMS team</a></li>
+                
+                <li><a class="dropdown-item dropdown-toggle" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#">Career</a>
+                  <ul class="submenu submenu-left dropdown-menu"><li><a class="dropdown-item" href="https://www.gams.com/about/openings">Openings</a></li>
+                    <li><a class="dropdown-item" href="https://www.gams.com/about/internships">Internships</a></li>
+                    
+                  </ul>
+                </li>
+                
+                <li><a class="dropdown-item" href="https://www.gams.com/about/advisory"> Advisory Board</a></li></ul>
+            </li>
+            
+            </ul>
+          
+        
+        
+        </div>
+      
+      </div>
+    
+    </nav>
+</div>
+
+
+
+
+
+     
+    
+    
+      
+</header>
+<div id="content-area" class="content-page" style="margin-top: 93.6094px; cursor: auto;">
+  
+  
+  
+  <table class="markdownTable">
+<tbody><tr class="markdownTableHead">
+<th class="markdownTableHeadLeft">GAMS Model Type </th><th class="markdownTableHeadLeft">Model Type Description </th><th class="markdownTableHeadLeft">Requirements and Comments  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationLP"></a> <a class="anchor" id="INDEX_model_21_classification_22_LP" keyword="model classification!LP"></a> <a class="anchor" id="INDEX_model_21_classification_22_LP_DUMMY_47"></a> <a class="anchor" id="INDEX_LP_2d__21_model_21_type" keyword="LP, model type"></a> <a class="anchor" id="INDEX_LP_2d__21_model_21_type_DUMMY_48"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_LP">LP</a> </td><td class="markdownTableBodyLeft">Linear Program </td><td class="markdownTableBodyLeft">Model with no nonlinear terms or discrete (i.e. binary, integer, etc) variables.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationNLP"></a>  <a class="anchor" id="INDEX_model_21_classification_22_NLP" keyword="model classification!NLP"></a> <a class="anchor" id="INDEX_model_21_classification_22_NLP_DUMMY_49"></a> <a class="anchor" id="INDEX_NLP_2d__21_model_21_type" keyword="NLP, model type"></a> <a class="anchor" id="INDEX_NLP_2d__21_model_21_type_DUMMY_50"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_NLP">NLP</a> </td><td class="markdownTableBodyLeft">Nonlinear Program </td><td class="markdownTableBodyLeft">Model with general nonlinear terms involving only <em>smooth</em> functions, but no discrete variables. For a classification of functions as to smoothness, see section <a class="el" href="https://www.gams.com/latest/docs/UG_Parameters.html#UG_Parameters_Functions">Functions</a>.  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationQCP"></a>  <a class="anchor" id="INDEX_model_21_classification_22_QCP" keyword="model classification!QCP"></a> <a class="anchor" id="INDEX_model_21_classification_22_QCP_DUMMY_51"></a> <a class="anchor" id="INDEX_QCP_2d__21_model_21_type" keyword="QCP, model type"></a> <a class="anchor" id="INDEX_QCP_2d__21_model_21_type_DUMMY_52"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_QCP">QCP</a> </td><td class="markdownTableBodyLeft">Quadratically Constrained Program </td><td class="markdownTableBodyLeft">Model with linear and quadratic terms, but no general nonlinear terms or discrete variables.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationDNLP"></a> <a class="anchor" id="INDEX_model_21_classification_22_DNLP" keyword="model classification!DNLP"></a> <a class="anchor" id="INDEX_model_21_classification_22_DNLP_DUMMY_53"></a> <a class="anchor" id="INDEX_DNLP_2d__21_model_21_type" keyword="DNLP, model type"></a> <a class="anchor" id="INDEX_DNLP_2d__21_model_21_type_DUMMY_54"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_DNLP">DNLP</a> </td><td class="markdownTableBodyLeft">Discontinuous Nonlinear Program </td><td class="markdownTableBodyLeft">Model with <em>non-smooth</em> nonlinear terms with discontinuous derivatives, but no discrete variables. This is the same as <code>NLP</code>, except that non-smooth functions may appear as well. These models are more difficult to solve than normal <code>NLP</code> models and we strongly advise not to use this model type.  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationMIP"></a> <a class="anchor" id="INDEX_model_21_classification_22_MIP" keyword="model classification!MIP"></a> <a class="anchor" id="INDEX_model_21_classification_22_MIP_DUMMY_57"></a> <a class="anchor" id="INDEX_MIP_2d__21_model_21_type" keyword="MIP, model type"></a> <a class="anchor" id="INDEX_MIP_2d__21_model_21_type_DUMMY_58"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_MIP">MIP</a> </td><td class="markdownTableBodyLeft">Mixed Integer Program </td><td class="markdownTableBodyLeft">Model with binary, integer, SOS and/or semi variables, but no nonlinear terms.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyLeft">RMIP<a class="anchor" id="UG_ModelSolve_modelclassificationRMIP"></a> <a class="anchor" id="INDEX_model_21_classification_22_RMIP" keyword="model classification!RMIP"></a> <a class="anchor" id="INDEX_model_21_classification_22_RMIP_DUMMY_59"></a> <a class="anchor" id="INDEX_RMIP_2d__21_model_21_type" keyword="RMIP, model type"></a> <a class="anchor" id="INDEX_RMIP_2d__21_model_21_type_DUMMY_60"></a> </td><td class="markdownTableBodyLeft">Relaxed Mixed Integer Program </td><td class="markdownTableBodyLeft">Like <code>MIP</code>, except that the discrete variable requirement is relaxed. See the note below on relaxed model types.  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationMINLP"></a>  <a class="anchor" id="INDEX_model_21_classification_22_MINLP" keyword="model classification!MINLP"></a> <a class="anchor" id="INDEX_model_21_classification_22_MINLP_DUMMY_61"></a> <a class="anchor" id="INDEX_MINLP_2d__21_model_21_type" keyword="MINLP, model type"></a> <a class="anchor" id="INDEX_MINLP_2d__21_model_21_type_DUMMY_62"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_MINLP">MINLP</a> </td><td class="markdownTableBodyLeft">Mixed Integer Nonlinear Program </td><td class="markdownTableBodyLeft">Model with both nonlinear terms <em>and</em> discrete variables.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyLeft">RMINLP<a class="anchor" id="UG_ModelSolve_modelclassificationRMINLP"></a>  <a class="anchor" id="INDEX_model_21_classification_22_RMINLP" keyword="model classification!RMINLP"></a> <a class="anchor" id="INDEX_model_21_classification_22_RMINLP_DUMMY_63"></a> <a class="anchor" id="INDEX_RMINLP_2d__21_model_21_type" keyword="RMINLP, model type"></a> <a class="anchor" id="INDEX_RMINLP_2d__21_model_21_type_DUMMY_64"></a> </td><td class="markdownTableBodyLeft">Relaxed Mixed Integer Nonlinear Program </td><td class="markdownTableBodyLeft">Like <code>MINLP</code> except that the discrete variable requirement is relaxed. See the note below on relaxed model types.  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationMIQCP"></a> <a class="anchor" id="INDEX_model_21_classification_22_MIQCP" keyword="model classification!MIQCP"></a> <a class="anchor" id="INDEX_model_21_classification_22_MIQCP_DUMMY_65"></a> <a class="anchor" id="INDEX_MIQCP_2d__21_model_21_type" keyword="MIQCP, model type"></a> <a class="anchor" id="INDEX_MIQCP_2d__21_model_21_type_DUMMY_66"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_MIQCP">MIQCP</a> </td><td class="markdownTableBodyLeft">Mixed Integer Quadratically Constrained Program </td><td class="markdownTableBodyLeft">Model with both quadratic terms <em>and</em> discrete variables, but no general nonlinear term.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyLeft">RMIQCP<a class="anchor" id="UG_ModelSolve_modelclassificationRMIQCP"></a> <a class="anchor" id="INDEX_model_21_classification_22_RMIQCP" keyword="model classification!RMIQCP"></a> <a class="anchor" id="INDEX_model_21_classification_22_RMIQCP_DUMMY_67"></a>  <a class="anchor" id="INDEX_RMIQCP_2d__21_model_21_type" keyword="RMIQCP, model type"></a> <a class="anchor" id="INDEX_RMIQCP_2d__21_model_21_type_DUMMY_68"></a> </td><td class="markdownTableBodyLeft">Relaxed Mixed Integer Quadratically Constrained Program </td><td class="markdownTableBodyLeft">Like <code>MIQCP</code> except that the discrete variable requirement is relaxed. See the note below on relaxed model types.  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationMCP"></a> <a class="anchor" id="INDEX_model_21_classification_22_MCP" keyword="model classification!MCP"></a> <a class="anchor" id="INDEX_model_21_classification_22_MCP_DUMMY_69"></a> <a class="anchor" id="INDEX_MCP_2d__21_model_21_type" keyword="MCP, model type"></a> <a class="anchor" id="INDEX_MCP_2d__21_model_21_type_DUMMY_70"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_MCP">MCP</a> </td><td class="markdownTableBodyLeft">Mixed Complementarity Problem </td><td class="markdownTableBodyLeft">A square, possibly nonlinear, model that generalizes a system of equations. Rows and columns are matched in one-to-one complementary relationships.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationCNS"></a> <a class="anchor" id="INDEX_model_21_classification_22_CNS" keyword="model classification!CNS"></a> <a class="anchor" id="INDEX_model_21_classification_22_CNS_DUMMY_71"></a> <a class="anchor" id="INDEX_CNS_2d__21_model_21_type" keyword="CNS, model type"></a> <a class="anchor" id="INDEX_CNS_2d__21_model_21_type_DUMMY_72"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_CNS">CNS</a> </td><td class="markdownTableBodyLeft">Constrained Nonlinear System </td><td class="markdownTableBodyLeft">Model solving a square, possibly nonlinear system of equations, with an equal number of variables and constraints.  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationMPEC"></a> <a class="anchor" id="INDEX_model_21_classification_22_MPEC" keyword="model classification!MPEC"></a> <a class="anchor" id="INDEX_model_21_classification_22_MPEC_DUMMY_73"></a>  <a class="anchor" id="INDEX_MPEC_2d__21_model_21_type" keyword="MPEC, model type"></a> <a class="anchor" id="INDEX_MPEC_2d__21_model_21_type_DUMMY_74"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_MPEC">MPEC</a> </td><td class="markdownTableBodyLeft">Mathematical Programs with Equilibrium Constraints </td><td class="markdownTableBodyLeft">A difficult model type for which solvers and reformulations are currently being developed.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyLeft">RMPEC<a class="anchor" id="UG_ModelSolve_modelclassificationRMPEC"></a> <a class="anchor" id="INDEX_model_21_classification_22_RMPEC" keyword="model classification!RMPEC"></a> <a class="anchor" id="INDEX_model_21_classification_22_RMPEC_DUMMY_75"></a>  <a class="anchor" id="INDEX_RMPEC_2d__21_model_21_type" keyword="RMPEC, model type"></a> <a class="anchor" id="INDEX_RMPEC_2d__21_model_21_type_DUMMY_76"></a> </td><td class="markdownTableBodyLeft">Relaxed Mathematical Program with Equilibrium Constraints </td><td class="markdownTableBodyLeft">A difficult model type for which solvers and reformulations are currently being developed. See the note below on relaxed model types.  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyLeft"><a class="anchor" id="UG_ModelSolve_modelclassificationEMP"></a> <a class="anchor" id="INDEX_model_21_classification_22_EMP" keyword="model classification!EMP"></a> <a class="anchor" id="INDEX_model_21_classification_22_EMP_DUMMY_78"></a>  <a class="anchor" id="INDEX_EMP_2d__21_model_21_type" keyword="EMP, model type"></a> <a class="anchor" id="INDEX_EMP_2d__21_model_21_type_DUMMY_79"></a><a class="el" href="https://www.gams.com/latest/docs/UG_ModelSolve.html#UG_ModelSolve_ModelClassificationOfModels_EMP">EMP</a> </td><td class="markdownTableBodyLeft">Extended Mathematical Program </td><td class="markdownTableBodyLeft">A family of mathematical programming extensions.  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyLeft">MPSGE </td><td class="markdownTableBodyLeft">General Equilibrium </td><td class="markdownTableBodyLeft">Not actually a model type but mentioned for completeness, see <a class="el" href="https://www.gams.com/latest/docs/UG_MPSGE_Intermediate.html">MPSGE</a>.  </td></tr>
+</tbody></table></div>
+  
+<script src="./Model and Solve Statements_files/jquery.js.download"></script>
+<script src="./Model and Solve Statements_files/jquery.highlight.js.download"></script>
+<script src="./Model and Solve Statements_files/navtree.js.download"></script>
+<script src="./Model and Solve Statements_files/navtreeinfo.js.download"></script>
+<script src="./Model and Solve Statements_files/navtreeindex.js.download"></script>
+
+  
+
+
+</body></html>

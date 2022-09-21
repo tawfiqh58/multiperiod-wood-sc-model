@@ -274,14 +274,14 @@ free variables
      z
 ;
 
-Positive Variables
+Variables
      w(a,v,t)
      w1(b,f,t)
      w11(b,e,g,t)
      y111(b,e,g,p,t) number of product p transported by vehicle g from wholesaller b to retailer e on day t
 *    bo(k,p,t) k not init     
      bo(e,p,t)
-*    ux(m,(t-1)) not working
+*     u1(m,t-1) not working; this is just a variable maybe no need to say t-1
      u1(m,t)
      u_pt(p,t)
      u11(b,p,t)
@@ -296,6 +296,28 @@ Positive Variables
      y11(b,g,p,t)
 ;
 
+Positive Variables
+     w
+     w1
+     w11
+     y111
+     bo
+     u1
+     u_pt
+     u11
+     u111
+     wb
+     wb1
+     yb
+     yb1
+     y
+     y1
+     y11;
+*loop(i$(ord(t)),
+*  u1) = f(t-2) + f(i-1);
+*);
+*u1 = u1(m, t-1);
+
 binary variables     
      x(a,v,t)
      x1(b,f,t)
@@ -306,7 +328,7 @@ binary variables
 
 Equations
      cost        define objective function
-     eqn1(e,p,t) product supply equation 
+*     eqn1(e,p,t) product supply equation 
      eqn2(m,j,t)
      eqn3(t)
      eqn4(t)
@@ -347,15 +369,16 @@ Equations
 * u' = u_pt because u' has duplicate
 * I'p = Ip because ix already defined
 
-cost..        z  =e=  (sum(a,sum(v,sum(m,sum(t,c(m,a)*y(a,v,m,t)))))) + (sum(a,sum(v,sum(t,cx(a,v)*x(a,v,t))))+sum(a,sum(v,sum(m,sum(t,cxx(m,a)*y(a,v,m,t)))))) +
-(sum(p,sum(t,ct(p)*y1(p,t)))) + (sum(b,sum(f,sum(t,cs(b,f)*x1(b,f,t))))+ sum(b,sum(g,sum(p,sum(t,cf(b,p)*y11(b,g,p,t)))))) +
-(sum(b,sum(e,sum(g,sum(t,cr(b,e,g)*x11(b,e,g,t)))))+sum(b,sum(e,sum(g,sum(p,sum(t,cd(b,e,p)*y111(b,e,g,p,t))))))) +
-(sum(m,sum(t,ch(m,t)*u1(m,t))) + sum(p,sum(t,chx(p,t)*u_pt(p,t))) + sum(b,sum(p,sum(t,chxx(b,p,t)*u11(b,p,t)))) + sum(e,sum(p,sum(t,chxxx(e,p,t)*u111(e,p,t))))) +
-sum(e,sum(p,sum(t,Pept(e,p,t)*bo(e,p,t)))) + (Cinv*sum(a,sum(v,sum(m,sum(t,y(a,v,m,t)))))) + (sum(e,sum(i,sum(j,sum(p,sum(t,ck(e,p)*yb(e,i,j,p,t))))))) +
-(sum(e,sum(j,sum(i,sum(t,feij(e,i,j)*xb(e,i,j,t))))) + sum(e,sum(j,sum(i,sum(p,sum(t,cz(e,j,p)*yb(e,i,j,p,t))))))) +
-(sum(j,sum(ix,sum(t,fx(ix,j)*xb1(ix,j,t)))) + sum(j,sum(ix,sum(m,sum(t,czx(j,m)*yb1(ix,j,m,t))))) - (Cinvx*sum(j,sum(ix,sum(m,sum(t,yb1(ix,j,m,t)))))));
+cost..        z  =e=  (sum(a,sum(v,sum(m,sum(t,c(m,a)*y(a,v,m,t))))));
+* + (sum(a,sum(v,sum(t,cx(a,v)*x(a,v,t))))+sum(a,sum(v,sum(m,sum(t,cxx(m,a)*y(a,v,m,t)))))) +
+*(sum(p,sum(t,ct(p)*y1(p,t)))) + (sum(b,sum(f,sum(t,cs(b,f)*x1(b,f,t))))+ sum(b,sum(g,sum(p,sum(t,cf(b,p)*y11(b,g,p,t)))))) +
+*(sum(b,sum(e,sum(g,sum(t,cr(b,e,g)*x11(b,e,g,t)))))+sum(b,sum(e,sum(g,sum(p,sum(t,cd(b,e,p)*y111(b,e,g,p,t))))))) +
+*(sum(m,sum(t,ch(m,t)*u1(m,t))) + sum(p,sum(t,chx(p,t)*u_pt(p,t))) + sum(b,sum(p,sum(t,chxx(b,p,t)*u11(b,p,t)))) + sum(e,sum(p,sum(t,chxxx(e,p,t)*u111(e,p,t))))) +
+*sum(e,sum(p,sum(t,Pept(e,p,t)*bo(e,p,t)))) + (Cinv*sum(a,sum(v,sum(m,sum(t,y(a,v,m,t)))))) + (sum(e,sum(i,sum(j,sum(p,sum(t,ck(e,p)*yb(e,i,j,p,t))))))) +
+*(sum(e,sum(j,sum(i,sum(t,feij(e,i,j)*xb(e,i,j,t))))) + sum(e,sum(j,sum(i,sum(p,sum(t,cz(e,j,p)*yb(e,i,j,p,t))))))) +
+*(sum(j,sum(ix,sum(t,fx(ix,j)*xb1(ix,j,t)))) + sum(j,sum(ix,sum(m,sum(t,czx(j,m)*yb1(ix,j,m,t))))) - (Cinvx*sum(j,sum(ix,sum(m,sum(t,yb1(ix,j,m,t)))))));
 
-eqn1(e,p,t)..  (sum(b,sum(g, y111(b,e,g,p,t))) + u111(e,p,t-1) - u111(e,p,t)) * BRpe(p,e) =e= sum(j,sum(i,yb(e,i,j,p,t))) ;
+*eqn1(e,p,t)..  (sum(b,sum(g, y111(b,e,g,p,t))) + u111(e,p,t-1) - u111(e,p,t)) * BRpe(p,e) =e= sum(j,sum(i,yb(e,i,j,p,t))) ;
 eqn2(m,j,t).. sum(e,sum(i,sum(p,Alpha(m,p)*yb(e,i,j,p,t)))) =e= sum(ix,yb1(ix,j,m,t));
 eqn3(t).. sum(m,Im(m)*u1(m,t)) =l= cp;
 eqn4(t).. sum(p,Ip(p)*u_pt(p,t)) =l= cpx;

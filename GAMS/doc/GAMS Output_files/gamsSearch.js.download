@@ -1,0 +1,344 @@
+
+var uni_version = "38";  // needs to be replaced by distribution number
+
+// Solr Core Names
+var uni_docscore = uni_version + "docs";
+var uni_modlibscore = uni_version + "modlibs";
+var uni_mirocore = "miro";
+var uni_webcore = "web";
+var uni_enginecore = "engine";
+
+// Translation of Solr indexing location to uni_weblocation
+var uni_orglocation = "/var/www/www.gams.com/" + uni_version + "/";
+var uni_weblocation = "https://www.gams.com/" + uni_version + "/" ;
+var uni_solrhost = "https://search.gams.com/";
+var uni_fragsize = 200;
+
+
+function uni_on_data(data) {
+
+    // Find out which tab  we need to return the results to
+    var searchArea;
+    if ( $('#v-pills-everything').hasClass('active') ) { searchArea = 'everything'; }
+    else if ( $('#v-pills-gams-doc').hasClass('active') ) { searchArea = 'gams-doc'; }
+    else if ( $('#v-pills-mod-lib').hasClass('active') ) { searchArea = 'mod-lib'; }
+    else if ( $('#v-pills-miro-doc').hasClass('active') ) { searchArea = 'miro-doc'; }
+    else if ( $('#v-pills-engine-doc').hasClass('active') ) { searchArea = 'engine-doc'; }
+    else if ( $('#v-pills-website').hasClass('active') ) { searchArea = 'website'; }
+
+    var searchTab = '#v-pills-' + searchArea;
+
+    $(searchTab + ' .uni_inforesults').empty();
+    $(searchTab + ' .uni_searchresults').empty();
+    $(searchTab + ' .uni_navresults').empty();
+
+    var docs = data.response.docs;
+    $.each(docs, function(i, item) {
+
+      // GAMS-doc results have different structure than MIRO results
+      if ((searchArea == 'gams-doc') || (searchArea == 'mod-lib')) {
+        var stringified = JSON.stringify(item.resourcename);
+        stringified = stringified.replace(uni_orglocation, uni_weblocation);
+        var hl = "";
+        if (typeof(data.highlighting[item.id]._text_) != "undefined") {
+          hl = data.highlighting[item.id]._text_[0] + " ... " + data.highlighting[item.id]._text_[1] + " ... ";
+        }
+        var title =  item.title;
+        if (typeof(title) == "undefined") {
+          title = item.resourcename;
+        }
+
+        var label = "";
+        var section = "";
+        var searchstr = JSON.stringify(item.resourcename);
+        if ( $('#uni_alldocsTab').hasClass('active') ) {
+          if ( searchstr.search('/RN_') != -1 ) { section = "Release Notes"; }
+          if ( searchstr.search('/UG_') != -1 ) { section = "User's Guide"; }
+          if ( searchstr.search('/apis/') != -1 ) { section = "API Manuals"; }
+          if ( searchstr.search('/S_') != -1 ) { section = "Solver Manuals"; }
+          if ( searchstr.search('/T_') != -1 ) { section = "Tools Manuals"; }
+        } else if ( $('#uni_allmodlibsTab').hasClass('active') ) {
+          if ( searchstr.search('/gamslib_ml/') != -1 ) { section = "Model Library"; }
+          if ( searchstr.search('/testlib_ml/') != -1 ) { section = "Test Library"; }
+          if ( searchstr.search('/datalib_ml/') != -1 ) { section = "Data Library"; }
+          if ( searchstr.search('/emplib_ml/') != -1 ) { section = "EMP Library"; }
+          if ( searchstr.search('/apilib_ml/') != -1 ) { section = "API Library"; }
+          if ( searchstr.search('/finlib_ml/') != -1 ) { section = "FIN Library"; }
+          if ( searchstr.search('/noalib_ml/') != -1 ) { section = "NOA Library"; }
+          if ( searchstr.search('/psoptlib_ml/') != -1 ) { section = "PSOPT Library"; }
+        }
+        if (section) {
+          label = "<br/> <strong>Section:</strong> "+ section ;
+        }
+        $(searchTab + ' .uni_searchresults').append($('<div class="uni_resultentry"> <a href="' + JSON.parse(stringified) + '?search='+ $('#uni_query').val().trim() + '">'+ item.title +'</a> <br/>'+ hl + label + '</div>'));
+
+     } else if (searchArea == 'miro-doc' || searchArea == 'engine-doc') {
+        var stringified = JSON.stringify(item.id);
+        var hl = "";
+        if (typeof(data.highlighting[item.id].content) != "undefined") {
+          hl = data.highlighting[item.id].content[0] + " ... " + data.highlighting[item.id].content[1] + " ... ";
+        }
+        var title =  item.title;
+        if (typeof(title) == "undefined") {
+          title = item.id;
+        }
+        $(searchTab + ' .uni_searchresults').append($('<div class="uni_resultentry"> <a href="' + JSON.parse(stringified) + '?search='+ $('#uni_query').val().trim() + '">'+ item.title +'</a> <br/>'+ hl + '</div>'));
+
+
+     } else if (searchArea == 'website') {
+          var stringified = JSON.stringify(item.id);
+          var hl = "";
+          if (typeof(data.highlighting[item.id].content) != "undefined") {
+            hl = data.highlighting[item.id].content[0] + " ... " + data.highlighting[item.id].content[1] + " ... ";
+          }
+          var title =  item.title;
+          if (typeof(title) == "undefined") {
+            title = item.id;
+          }
+          $(searchTab + ' .uni_searchresults').append($('<div class="uni_resultentry"> <a href="' + JSON.parse(stringified) + '?search='+ $('#uni_query').val().trim() + '">'+ item.title +'</a> <br/>'+ hl + '</div>'));
+
+     } 
+
+    });
+
+    var found = data.response.numFound;
+    var start = data.response.start;
+    var total = 'Found ' + found + ' results.';
+    $(searchTab + ' .uni_inforesults').prepend('<div class="resultsummary">' + total + '</div>');
+    if (found <= 0)
+       $(searchTab + ' .uni_navresults').prepend('<div>No matching entry to display.</div>');
+
+    var request = uni_solrhost;
+    var fq = ""
+    // if ($('#searchdocs').hasClass('active')) {
+    if ($('#v-pills-gams-doc').hasClass('active')) {
+       request += uni_docscore;
+       request += "/";
+       if ( $('#uni_rnTab').hasClass('active') ) { fq = "resourcename:*/RN_*"; }
+       if ( $('#uni_ugTab').hasClass('active') ) { fq = "resourcename:*/UG_*"; }
+       if ( $('#uni_solverTab').hasClass('active') ) { fq = "resourcename:*/S_*"; }
+       if ( $('#uni_apiTab').hasClass('active') ) { fq = "resourcename:*/apis*"; }
+       if ( $('#uni_toolTab').hasClass('active') ) { fq = "resourcename:*/T_*"; }
+    } else if ($('#v-pills-mod-lib').hasClass('active')) {
+       request += uni_modlibscore;
+       request += "/";
+       if ( $('#uni_gamslibTab').hasClass('active') ) { fq = "resourcename:*/gamslib_ml/*"; }
+       if ( $('#uni_testlibTab').hasClass('active') ) { fq = "resourcename:*/testlib_ml/*"; }
+       if ( $('#uni_datalibTab').hasClass('active') ) { fq = "resourcename:*/datalib_ml/*"; }
+       if ( $('#uni_apilibTab').hasClass('active') ) { fq = "resourcename:*/apilib_ml/*"; }
+       if ( $('#uni_emplibTab').hasClass('active') ) { fq = "resourcename:*/emplib_ml/*"; }
+       if ( $('#uni_finlibTab').hasClass('active') ) { fq = "resourcename:*/finlib_ml/*"; }
+       if ( $('#uni_noalibTab').hasClass('active') ) { fq = "resourcename:*/noalib_ml/*"; }
+       if ( $('#uni_psoptlibTab').hasClass('active') ) { fq = "resourcename:*/psoptlib_ml/*"; }
+    } else if ($('#v-pills-miro-doc').hasClass('active')) {
+        request += uni_mirocore;
+        request += "/";
+    } else if ($('#v-pills-engine-doc').hasClass('active')) {
+        request += uni_enginecore;
+        request += "/";
+    } else if ($('#v-pills-website').hasClass('active')) {
+        request += uni_webcore;
+        request += "/";
+    } else {
+      return;
+    }
+
+    if ( ($('#v-pills-mod-lib').hasClass('active')) || ($('#v-pills-gams-doc').hasClass('active')) ) {
+      request += 'elevate?bq=resourcename%3A*UG_*^3.0&bq=resourcename%3A*RN_*%5E0.5&defType=edismax';
+      if (fq.length > 0) {
+         request += '&fq=';
+         request += fq;
+      }
+    } else {
+      request += 'select?';
+      request += '&df=content';
+    }
+
+    request += '&q.op=AND';
+    request += '&q=';      request += data.responseHeader.params.q;
+    request += '&fl=';           request += data.responseHeader.params.fl;
+    request += '&wt=';           request += data.responseHeader.params.wt;
+    request += '&indent=';       request += data.responseHeader.params.indent;
+    request += '&hl=true';
+    request += '&hl.snippets=';  request += data.responseHeader.params["hl.snippets"];
+    request += '&hl.fragsize=';  request += data.responseHeader.params["hl.fragsize"];
+    request += '&callback=?&json.wrf=uni_on_data';
+
+    var start = data.responseHeader.params.start;
+    var rows = + data.responseHeader.params.rows;
+    request += '&rows=' + rows;
+
+    var requestedURL =  request + '&start=' + start;
+    //$('#request').prepend('<div"><a href="'+requestedURL+'">' + requestedURL + '</a></div> ' + Math.round(found/rows));
+
+    if (Math.ceil(found/rows) > 0) {
+       var iter = '';
+       for (i = 0; i < Math.ceil(found/rows); i++) {
+           var newstart = (i*rows);
+           var url = request + '&start=' + newstart;
+           if (start == newstart)  {
+             iter += '<button type="button" class="btn btn-link disabled">';
+           } else  {
+              iter += '<button type="button" class ="btn btn-link" onclick="uni_navTo(event, \'';
+              iter += url;
+              iter += '\')">';
+           }
+           iter += (i+1);
+           iter += "</button>"
+           iter += '  ';
+           if (i >= 19) {
+              iter += '<button type="button" class="btn btn-link disabled tooltip blue"> >> <span class="tooltiptext">Only first 200 results available. Refine your search for better results.</span> </button>'; break;
+           }
+       }
+       $(searchTab + ' .uni_navresults').prepend('<div>' + iter + '</div>');
+    }
+    $(window).scrollTop(0);
+}
+
+function uni_navTo(event, url) {
+    $.getJSON(url);
+}
+
+function uni_on_search() {
+
+  // Find out which tab  we need to return the results to
+  var searchTab;
+  if ( $('#v-pills-everything').hasClass('active') ) { searchTab = '#v-pills-everything'; }
+  else if ( $('#v-pills-gams-doc').hasClass('active') ) { searchTab = '#v-pills-gams-doc'; }
+  else if ( $('#v-pills-mod-lib').hasClass('active') ) { searchTab = '#v-pills-mod-lib'; }
+  else if ( $('#v-pills-miro-doc').hasClass('active') ) { searchTab = '#v-pills-miro-doc'; }
+  else if ( $('#v-pills-engine-doc').hasClass('active') ) { searchTab = '#v-pills-engine-doc'; }
+  else if ( $('#v-pills-website').hasClass('active') ) { searchTab = '#v-pills-website'; }
+
+    $(searchTab + ' .uni_inforesults').empty();
+    $(searchTab + ' .uni_searchresults').empty();
+    $(searchTab + ' .uni_navresults').empty();
+    //$('#request').empty();
+
+    if ($('#uni_query').val().trim().length == 0) {
+        return;
+    }
+
+   var query = $('#uni_query').val();
+
+   //showIndexResults(query, kws);
+
+   var location = uni_solrhost;
+   var fq = "";
+   var facet_prefix = "";
+
+   if ($('#v-pills-gams-doc').hasClass('active')) {
+       location += uni_docscore;
+       location += "/";
+       if ( $('#uni_alldocsTab').hasClass('active') ) { facet_prefix = uni_orglocation; }
+       if ( $('#uni_rnTab').hasClass('active') ) { fq = "resourcename:*/RN_*"; }
+       if ( $('#uni_ugTab').hasClass('active') ) { fq = "resourcename:*/UG_*"; }
+       if ( $('#uni_solverTab').hasClass('active') ) { fq = "resourcename:*/S_*"; }
+       if ( $('#uni_apiTab').hasClass('active') ) { fq = "resourcename:*/api*"; }
+       if ( $('#uni_toolTab').hasClass('active') ) { fq = "resourcename:*/T_*"; }
+   } else if ($('#v-pills-mod-lib').hasClass('active')) {
+       location += uni_modlibscore;
+       location += "/";
+       if ( $('#uni_allmodlibsTab').hasClass('active') ) { facet_prefix = uni_orglocation; }
+       if ( $('#uni_gamslibTab').hasClass('active') ) { fq = "resourcename:*gamslib_ml*"; }
+       if ( $('#uni_testlibTab').hasClass('active') ) { fq = "resourcename:*testlib_ml*"; }
+       if ( $('#uni_datalibTab').hasClass('active') ) { fq = "resourcename:*datalib_ml*"; }
+       if ( $('#uni_apilibTab').hasClass('active') ) { fq = "resourcename:*apilib_ml*"; }
+       if ( $('#uni_emplibTab').hasClass('active') ) { fq = "resourcename:*emplib_ml*"; }
+       if ( $('#uni_finlibTab').hasClass('active') ) { fq = "resourcename:*finlib_ml*"; }
+       if ( $('#uni_noalibTab').hasClass('active') ) { fq = "resourcename:*noalib_ml*"; }
+       if ( $('#uni_psoptlibTab').hasClass('active') ) { fq = "resourcename:*psoptlib_ml*"; }
+    } else if ($('#v-pills-miro-doc').hasClass('active')) {
+        // TODO: Integrate MIRO Search
+        location += uni_mirocore;
+        location += "/";
+    } else if ($('#v-pills-engine-doc').hasClass('active')) {
+        location += uni_enginecore;
+        location += "/";
+    } else if ($('#v-pills-website').hasClass('active')) {
+        location += uni_webcore;
+        location += "/";
+    } else {
+      return;
+   }
+
+   // MIRO search works differently to GAMS and Library search
+   if ( $('#v-pills-miro-doc').hasClass('active') || $('#v-pills-engine-doc').hasClass('active') ) {
+      var select = 'select';
+      select += '?q='+query+'&df=content&wt=json&callback=?&json.wrf=uni_on_data';
+      select += '&q.op=AND&fl=id,title,resourcename&indent=on&defType=edismax'
+      var highlight = 'hl=true' + '&hl.snippets=2' + '&hl.fl=content' + '&hl.fragsize=' + uni_fragsize + '&hl.q=' + query;
+      var chunk = 'start=0' + '&rows=10';
+      var url = location + select + '&' + highlight + '&' + chunk;
+    } else if ($('#v-pills-website').hasClass('active')) {
+      var select = 'select';
+      select += '?q='+query+'&df=content&wt=json&callback=?&json.wrf=uni_on_data';
+      select += '&q.op=AND&fl=id,title,resourcename&indent=on&defType=edismax'
+      var highlight = 'hl=true' + '&hl.snippets=2' + '&hl.fl=content' + '&hl.fragsize=' + uni_fragsize + '&hl.q=' + query;
+      var chunk = 'start=0' + '&rows=10';
+      var url = location + select + '&' + highlight + '&' + chunk;
+   } else {
+     var select = 'elevate?bq=resourcename%3A*UG_*%5E3.0&bq=resourcename%3A*RN_*%5E0.5&defType=edismax';
+     select += '&q='+query+'&q.op=AND&fl=id,title,resourcename&indent=on&wt=json&callback=?&json.wrf=uni_on_data';
+     var highlight = 'hl=true' + '&hl.snippets=2' + '&hl.fl=_text_' + '&hl.fragsize=' + uni_fragsize + '&hl.q=' + query;
+     var chunk = 'start=0' + '&rows=10';
+     if (fq.length == 0) {
+         var url= location +  select + '&' + highlight + '&' + chunk ;
+     }  else {
+         var url= location + select + '&fq=' +fq + '&' + highlight + '&' + chunk ;
+     }
+   }
+
+   $.getJSON(url);
+}
+
+function uni_on_ready() {
+
+    $("#uni_query").focus();
+    $('#uni_searchbutton').click(uni_on_search);
+    // $('body').keypress(function(e) {
+
+    $('#uni_searchModal').keypress(function(e) {
+        if (e.keyCode == '13') {
+            $('#uni_query').blur();
+            uni_on_search();
+        }
+    });
+
+}
+
+function uni_getParameterByName(name, url) {
+    if (!url)
+       url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+    results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+
+function uni_showSection(evt, sectionName) {
+    var i, uni_tablinks;
+
+    uni_tablinks = document.getElementsByClassName("uni_tablinks");
+    for (i = 0; i < uni_tablinks.length; i++) {
+        uni_tablinks[i].className = uni_tablinks[i].className.replace(" active", "");
+    }
+    evt.target.className += " active";
+    uni_on_search();
+}
+
+$(document).ready(function() {
+   // resizeContentToHeaderAndFooter();
+
+   $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
+     $('#uni_searchbutton').trigger('click');
+   });
+
+   // Make sure input box has focus when search box is opened
+   $('#uni_searchModal').on('shown.bs.modal',function(){$('#uni_query').focus()});
+
+   uni_on_ready();
+});

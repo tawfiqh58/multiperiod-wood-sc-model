@@ -1,0 +1,42 @@
+
+--- Job thesis_mip_showing_result-edit.gms Start 08/22/22 00:00:43 39.2.0 e0c5072f WEX-WEI x86 64bit/MS Windows
+--- Applying:
+    C:\GAMS\39\gmsprmNT.txt
+--- GAMS Parameters defined
+    Input C:\Users\tawfiq\Desktop\THESIS\gams\backup\thesis_mip_showing_result-edit.gms
+    PageSize 0
+    ScrDir C:\Users\tawfiq\Desktop\THESIS\gams\backup\225a\
+    SysDir C:\GAMS\39\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+Licensee: GAMS Demo license for TAWFIQ HAFIZI            G220605|0002CO-GEN
+          Military Institute, Bangladesh                           DL068940
+          C:\Users\tawfiq\Documents\GAMS\gamslice.txt
+          tawfiqhasan58@gmail.com, TAWFIQ HAFIZI                           
+          Demo license for demonstration and instructional purposes only
+Processor information: 1 socket(s), 2 core(s), and 4 thread(s) available
+GAMS 39.2.0   Copyright (C) 1987-2022 GAMS Development. All rights reserved
+--- Starting compilation
+--- thesis_mip_showing_result-edit.gms(397) 3 Mb 2 Errors
+*** Error  65 in C:\Users\tawfiq\Desktop\THESIS\gams\backup\thesis_mip_showing_result-edit.gms
+    Discrete variables can only appear in MIP, RMIP, MINLP
+      RMINLP MIQCP or RMIQCP MPEC RMPEC problems.
+*** Error 256 in C:\Users\tawfiq\Desktop\THESIS\gams\backup\thesis_mip_showing_result-edit.gms
+    Error(s) in analyzing solve statement.
+*** The following LP errors were detected in model thesisSolve:
+     65 equation cost.. discrete variable "xavt" not allowed
+     65 equation cost.. discrete variable "xx" not allowed
+     65 equation cost.. discrete variable "xxx" not allowed
+     65 equation cost.. discrete variable "xb" not allowed
+     65 equation cost.. discrete variable "xbx" not allowed
+     65 equation eqn7.. discrete variable "xavt" not allowed
+     65 equation eqn10.. discrete variable "xx" not allowed
+     65 equation eqn11.. discrete variable "xxx" not allowed
+     65 equation eqn18.. discrete variable "xbx" not allowed
+     65 equation eqn19.. discrete variable "xb" not allowed
+--- thesis_mip_showing_result-edit.gms(400) 3 Mb 2 Errors
+*** Status: Compilation error(s)
+--- Job thesis_mip_showing_result-edit.gms Stop 08/22/22 00:00:43 elapsed 0:00:00.029

@@ -1,0 +1,26 @@
+
+--- Job remove-test.gms Start 09/08/22 13:42:02 39.2.0 e0c5072f WEX-WEI x86 64bit/MS Windows
+--- Applying:
+    C:\GAMS\39\gmsprmNT.txt
+--- GAMS Parameters defined
+    Input C:\Users\tawfiq\Desktop\gams\others\remove-test.gms
+    PageSize 0
+    ScrDir C:\Users\tawfiq\Desktop\gams\others\225a\
+    SysDir C:\GAMS\39\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+Licensee: GAMS Demo license for TAWFIQ HAFIZI            G220605|0002CO-GEN
+          Military Institute, Bangladesh                           DL068940
+          C:\Users\tawfiq\Documents\GAMS\gamslice.txt
+          tawfiqhasan58@gmail.com, TAWFIQ HAFIZI                           
+          Demo license for demonstration and instructional purposes only
+Processor information: 1 socket(s), 2 core(s), and 4 thread(s) available
+GAMS 39.2.0   Copyright (C) 1987-2022 GAMS Development. All rights reserved
+--- Starting compilation
+--- remove-test.gms(332) 3 Mb
+--- Starting execution: elapsed 0:00:00.023
+*** Status: Normal completion
+--- Job remove-test.gms Stop 09/08/22 13:42:02 elapsed 0:00:00.024
