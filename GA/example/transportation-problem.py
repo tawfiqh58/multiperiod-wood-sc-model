@@ -274,11 +274,11 @@ def fitness(set,truck):
             for j in range(0,len(set[0][h][i])):
                 num_li = 0
                 for k in range(0,len(set[0][h][i][j])):
-                    num_li = num_li + set[0][h][i][j][k]
+                    num_li += set[0][h][i][j][k]
                 if num_li > lstock[i][j]:
-                    num_qw = num_qw - lstock[i][j] + num_li
-            con_sub = num_qw + con_sub
-        ex_1[h] = ex_1[h] + con_sub
+                    num_qw -= (lstock[i][j] + num_li)
+            con_sub += num_qw
+        ex_1[h] += con_sub
     
     # constraints2
     ex_2 = [0 for x in range(0, len(set[0]))]
@@ -309,7 +309,7 @@ def fitness(set,truck):
             con_sub = 0
             for j in range(0,len(set[4][h][i])):
                 for k in range(0,len(set[4][h][i][j])):
-                    con_sub = con_sub + set[4][h][i][j][k]
+                    con_sub += set[4][h][i][j][k]
             if con_sub > demand[i]:
                 ex_3[h] = ex_3[h] + (con_sub - demand[i])
     
@@ -348,7 +348,6 @@ def fitness(set,truck):
                 else:
                     if inv_avl[2][h][i][j] + imp_q[h][i][j]+inv_avl[1][h][i-1][j] < exp_q[h][i][j]:
                         ex_5[h] = ex_5[h] - inv_avl[2][h][i][j] + exp_q[h][i][j] - imp_q[h][i][j] - inv_avl[1][h][i-1][j]
-    const_all = [0 for x in range(0, len(set[0]))]
     
     # constraints6
     ex_6 = [0 for x in range(0, len(set[0]))]
@@ -370,6 +369,8 @@ def fitness(set,truck):
     #             if inv_avl[2][j][i][j] > 100:
 
     objective = obj_func(set,truck)
+
+    const_all = [0 for x in range(0, len(set[0]))]
     for h in range(0, len(ex_1)):
         const_all[h] = ex_1[h] + ex_2[h] + ex_3[h] + ex_4[h] + ex_5[h] + objective[h]
     #print len(const_all)
@@ -377,28 +378,26 @@ def fitness(set,truck):
 
 
 def obj_func(set,truck):
+    # total cost: inventory_cost + transportation_cost + emmision_cost
     inv_cost1 = [0 for x in range(0, len(set[0]))]
     for h in range(0,len(set[0])):
         cost = 0
         for i in range(0,6):
             for j in range(0,len(inv_avl[0][h][i])): # [0]
-                cost = cost + inv_avl[0][h][i][j]*22.05
-        inv_cost1[h] = inv_cost1[h] + cost
-    #print inv_cost1
+                cost += inv_avl[0][h][i][j]*22.05 # calculation different
+        inv_cost1[h] += cost
     for h in range(0,len(set[0])):
         cost = 0
         for i in range(0,6):
             for j in range(0,len(inv_avl[1][h][i])): # [1]
-                cost = cost + inv_avl[1][h][i][j]*105
-        inv_cost1[h] = inv_cost1[h] + cost
-    #print inv_cost1
+                cost += inv_avl[1][h][i][j]*105
+        inv_cost1[h] += cost
     for h in range(0,len(set[0])):
         cost = 0
         for i in range(0,6):
             for j in range(0,len(inv_avl[2][h][i])): # [2]
-                cost = cost + inv_avl[2][h][i][j]*105
-        inv_cost1[h] = inv_cost1[h] + cost
-    #print inv_cost1
+                cost += inv_avl[2][h][i][j]*105
+        inv_cost1[h] += cost
 
     trans_cost1 = [0 for x in range(0, len(set[0]))]
     for h in range(0,len(set[0])):
@@ -412,7 +411,7 @@ def obj_func(set,truck):
                             fill_rate = truck[2][h][i][k][l]/20
                             fuel = 0.258+(0.432-0.258)*fill_rate
                             cost = cost + 55*fill_rate + fuel*distij[k][l] + 0.258*distli[0][k] + 0.258*distlj[0][l]
-        trans_cost1[h] = trans_cost1[h] + cost
+        trans_cost1[h] += cost
     for h in range(0,len(set[0])):
         cost = 0
         for i in range(0,6):
@@ -424,7 +423,7 @@ def obj_func(set,truck):
                             fill_rate = truck[5][h][i][k][l]/20
                             fuel = 0.263+(0.432-0.263)*fill_rate
                             cost = cost + 55*fill_rate + fuel*distjk[k][l] + 0.263*distlj[0][k] + 0.263*distlk[0][l]
-        trans_cost1[h] = trans_cost1[h] + cost
+        trans_cost1[h] += cost
     emmision_cost1 = [0 for x in range(0, len(set[0]))]
     for h in range(0,len(set[0])):
         cost = 0
@@ -437,7 +436,7 @@ def obj_func(set,truck):
                             fill_rate = truck[2][h][i][k][l]/20
                             fuel = 0.258+(0.432-0.258)*fill_rate
                             cost = cost  + fuel*distij[k][l]*2.63 + 0.258*distli[0][k]*2.63 + 0.258*distlj[0][l]*2.63
-        emmision_cost1[h] = emmision_cost1[h] + cost
+        emmision_cost1[h] += cost
     for h in range(0,len(set[0])):
         cost = 0
         for i in range(0,6):
@@ -449,7 +448,8 @@ def obj_func(set,truck):
                             fill_rate = truck[5][h][i][k][l]/20
                             fuel = 0.263+(0.432-0.263)*fill_rate
                             cost = cost + (fuel*distjk[k][l] + 0.263*distlj[0][k] + 0.263*distlk[0][l])*2.63
-        emmision_cost1[h] = emmision_cost1[h] + cost
+        emmision_cost1[h] += cost
+    
     obj_cost = [0 for x in range(0, len(set[0]))]
     for h in range(0,len(set[0])):
         obj_cost[h] = inv_cost1[h] + trans_cost1[h] + emmision_cost1[h]
