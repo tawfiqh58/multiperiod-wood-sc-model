@@ -66,7 +66,12 @@ def init_population():
         for j in range(0,  6):
             for k in range(0,  pro):
                 for l in range(0, man):
-                    li_trans[i][j][k][l] =random.randint(10,  900) # 🚨 why I am going there and set this value
+                    li_trans[i][j][k][l] =random.randint(10,  900) 
+                    # 🚨 why I am going this position and set this value
+                    # to just asign random value to that combination
+                    # because GA is just asigning random value to the
+                    # combination and test the z func value
+
                     li_truck[i][j][k][l] =random.randint(2,  100)
                     li_type[i][j][k][l] =random.randint(0, 3)
             for k in range(0,  man):
