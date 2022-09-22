@@ -265,9 +265,12 @@ def fitness(set,truck):
     # get inventory
     inv_avl = inv_cal(set)
     
+    # set is this
+    # (li_trans, li_truck, inter_trans, inter_truck,  del_trans, li_type, inter_type)
+
     # constraints1
     ex_1 = [0 for x in range(0, len(set[0]))]
-    for h in range(0, len(set[0])): # [0]
+    for h in range(0, len(set[0])): # [0] li_trans
         con_sub = 0
         for i in range(0,6):  ##LIVE STOCK CONSTRAINT
             num_qw = 0
@@ -281,14 +284,14 @@ def fitness(set,truck):
         ex_1[h] += con_sub
     
     # constraints2
-    ex_2 = [0 for x in range(0, len(set[0]))]
+    ex_2 = [0 for x in range(0, len(set[0]))] 
     imp_q = [[[0 for x in range(0,len(set[0][0][0][0]))]for y in range(0,6)]for x in range(0, len(set[0]))]
     exp_q = [[[0 for x in range(0,len(set[2][0][0]))]for y in range(0,6)]for x in range(0, len(set[0]))]
-    for h in range(0, len(set[0])): # [0]
+    for h in range(0, len(set[0])): # [0] li_trans
         for i in range(0,6):  ##Live stock Inventory
-            for j in range(0,len(set[2][h][i])):
-                for k in range(0,len(set[2][h][i][j])):
-                    exp_q[h][i][j] = exp_q[h][i][j] + set[2][h][i][j][k]
+            for j in range(0,len(set[2][h][i])): # [2] inter_trans
+                for k in range(0,len(set[2][h][i][j])): # [2] inter_trans
+                    exp_q[h][i][j] = exp_q[h][i][j] + set[2][h][i][j][k] # [2] inter_trans
             for k in range(0,len(set[0][h][i][0])):
                 for l in range(0,len(set[0][h][i])):
                     #print k, l
@@ -307,8 +310,8 @@ def fitness(set,truck):
     for h in range(0,len(set[0])): # [0]
         for i in range(0,6):  ##Demand CONSTRAINT
             con_sub = 0
-            for j in range(0,len(set[4][h][i])):
-                for k in range(0,len(set[4][h][i][j])):
+            for j in range(0,len(set[4][h][i])): # [4] del_trans
+                for k in range(0,len(set[4][h][i][j])): # [4] del_trans
                     con_sub += set[4][h][i][j][k]
             if con_sub > demand[i]:
                 ex_3[h] = ex_3[h] + (con_sub - demand[i])

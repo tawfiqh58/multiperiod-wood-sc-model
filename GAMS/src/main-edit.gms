@@ -190,9 +190,9 @@ Parameters
 
     cx(a,v) fixed cost sending vehicle v form [supplier a -> factory]
     / supplierA.vehicle-supplierA 10
-      supplierA.vehicle-supplierB 12
-      supplierB.vehicle-supplierA 12
-      supplierB.vehicle-supplierB 13 /
+      supplierA.vehicle-supplierB 10
+      supplierB.vehicle-supplierA 10
+      supplierB.vehicle-supplierB 10 /
     
     cxx(m,a) transportation cost unit wooden raw material m form [supplier a -> factory]
     / raw-materialA.supplierA 2
