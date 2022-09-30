@@ -9,6 +9,7 @@ from dem import get as _dem
 from f import get as _f
 from normal_table import get as _normal_table
 from P import get as _P
+from result import write as _write_result
 from utils import convert_to_tuple
 
 # create random solution
@@ -255,5 +256,7 @@ def ga():
     print('score:', score)  # which has more fitness value
     print('soln gen:', soln)
 
-
+    res = _write_result(soln)
+    print(res)
+    
 ga()
