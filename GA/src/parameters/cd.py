@@ -22,6 +22,6 @@ def get():
         data.append(_data)
     
     d = convert_to_tuple(data)
-    print(d) # ([[1, 2], [3, 4]], [[2, 3], [4, 5]])
+    # print(d) # ([[1, 2], [3, 4]], [[2, 3], [4, 5]])
     # print(type(utils.convert_to_tuple(data)))
     return d
