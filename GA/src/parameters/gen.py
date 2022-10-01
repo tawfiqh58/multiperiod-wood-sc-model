@@ -102,7 +102,7 @@ def random_population(boundary):
         for collection in range(len(j)):
             for day in range(len(t)):
                 bound = [0, 10]  # trip bound
-                wb1[vehicle][collection][day] = random.randint(0, 1)
+                wb1[vehicle][collection][day] = random.randint(bound[0],  bound[1])
 
     # postponed orders
     bo = [[[0 for wwx in range(len(t))] for wv in range(len(p))]
@@ -132,7 +132,7 @@ def random_population(boundary):
         for product in range(len(p)):
             for day in range(len(t)):
                 bound = [0, 1000]  # inventory bound wholesaler
-                u11[wholesaler][product][day] = random.randint(0, 1)
+                u11[wholesaler][product][day] = random.randint(bound[0],  bound[1])
 
     u111 = [[[0 for wwx in range(len(t))]
              for wv in range(len(p))] for ww in range(len(e))]
@@ -140,7 +140,7 @@ def random_population(boundary):
         for product in range(len(p)):
             for day in range(len(t)):
                 bound = [0, 500]  # inventory bound retailer
-                u111[retailer][product][day] = random.randint(0, 1)
+                u111[retailer][product][day] = random.randint(bound[0],  bound[1])
 
     yb = [[[[[0 for wwx in range(len(t))] for wwx in range(len(p))] for wv in range(
         len(j))] for uxx in range(len(i))] for ww in range(len(e))]
@@ -151,7 +151,7 @@ def random_population(boundary):
                     for day in range(len(t)):
                         bound = [0, 100]  # product sent bound from retailer
                         yb[wholesaler][vehicle][collection][product][day] = random.randint(
-                            0, 1)
+                            bound[0],  bound[1])
 
     yb1 = [[[[0 for wwx in range(len(t))] for wv in range(
         len(m))] for swv in range(len(j))] for cwv in range(len(ix))]
@@ -209,11 +209,14 @@ def fitness_function(gen):
     x11 = gen[2]
     xb = gen[3]
     xb1 = gen[4]
+    
+    # value will be found from constraints
     w = gen[5]
     w1 = gen[6]
     w11 = gen[7]
     wb = gen[8]
     wb1 = gen[9]
+
     bo = gen[10]
     u1 = gen[11]
     u_pt = gen[12]
@@ -275,6 +278,7 @@ def fitness_function(gen):
         for _j in range(len(j)):
             for _t in range(len(t)):
                 # TODO: fix range issue
+                # vehicle loop insert
                 # trans_cost += fx[_ix][_j]*xb1[_ix][_j][_t]
                 trans_cost += fx[_j][0]*xb1[_ix][_j][_t]
     for _ix in range(len(ix)):
@@ -282,7 +286,7 @@ def fitness_function(gen):
             for _m in range(len(m)):
                 for _t in range(len(t)):
                     trans_cost += czx[_j][_m]*yb1[_ix][_j][_m][_t]
-    print('transportation cost: ', trans_cost)
+    # print('transportation cost: ', trans_cost)
 
     purchas_cost = 0
     for _a in range(len(a)):
@@ -296,14 +300,14 @@ def fitness_function(gen):
                 for _p in range(len(p)):
                     for _t in range(len(t)):
                         purchas_cost += ck[_e][_p]*yb[_e][_i][_j][_p][_t]
-    print('purchasing cost: ', purchas_cost)
+    # print('purchasing cost: ', purchas_cost)
 
     prod_cost = 0
     for _p in range(len(p)):
         for _t in range(len(t)):
             # TODO: single line input data re-structure
             prod_cost += ct[_p][0]*y1[_p][_t]
-    print('production cost: ', prod_cost)
+    # print('production cost: ', prod_cost)
 
     maintain_cost = 10
     for _m in range(len(m)):
@@ -320,14 +324,14 @@ def fitness_function(gen):
         for _p in range(len(p)):
             for _t in range(len(t)):
                 maintain_cost += chxxx[_e][_p][_t]*u111[_e][_p][_t]
-    print('maintain cost: ', maintain_cost)
+    # print('maintain cost: ', maintain_cost)
 
     shortage_cost = 0
     for _e in range(len(e)):
         for _p in range(len(p)):
             for _t in range(len(t)):
                 shortage_cost += P[_e][_p][_t]*bo[_e][_p][_t]
-    print('shortage cost: ', shortage_cost)
+    # print('shortage cost: ', shortage_cost)
 
     environ_cost = 0
     for _a in range(len(a)):
@@ -340,15 +344,16 @@ def fitness_function(gen):
             for _m in range(len(m)):
                 for _t in range(len(t)):
                     environ_cost -= yb1[_ix][_j][_m][_t]
-    print('environ cost: ', shortage_cost)
+    # print('environ cost: ', shortage_cost)
 
     # objective function
     z = trans_cost + purchas_cost + prod_cost + maintain_cost + \
         shortage_cost + environ_cost + panalty_cost
 
+    print('z: ', z)
     if (z == 0):
         return 9999999
-    return 1/z
+    return 1/z, z
 
 
 def ga():
@@ -407,18 +412,18 @@ def ga():
 
     score = 0
     soln = []
-    if (p2 > p1):
-        score = p2
+    if (p2[0] > p1[0]):
+        score = p2[1]
         soln = init_pop[1]
     else:
-        score = p1
+        score = p1[1]
         soln = init_pop[0]
 
     print('score:', score)  # which has more fitness value
     # print('soln gen:', soln)
 
-    # res = _write_result(soln)
-    # print(res)
+    res = _write_result(soln, score)
+    print(res)
 
 
 ga()
