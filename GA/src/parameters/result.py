@@ -336,4 +336,4 @@ def write(gen, value):
 
     doc.close()
 
-    return 'Success!'
+    return 'result.xlsx'

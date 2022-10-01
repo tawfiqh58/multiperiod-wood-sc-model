@@ -1,4 +1,6 @@
 import random
+from numpy.random import randint
+from numpy.random import rand
 from cd import get as _cd
 from chxx import get as _chxx
 from chxxx import get as _chxxx
@@ -11,6 +13,8 @@ from normal_table import get as _normal_table
 from P import get as _P
 from result import write as _write_result
 from utils import convert_to_tuple
+import matplotlib.pyplot as plt
+import numpy as np
 
 # create random solution
 
@@ -200,7 +204,7 @@ def random_population(boundary):
                         y111[wholesaler][retailer][vehicle][product][day] = random.randint(
                             bound[0],  bound[1])
 
-    return x, x1, x11, xb, xb1, w, w1, w11, wb, wb1, bo, u1, u_pt, u11, u111, yb, yb1, y, y1, y11, y111
+    return [x, x1, x11, xb, xb1, w, w1, w11, wb, wb1, bo, u1, u_pt, u11, u111, yb, yb1, y, y1, y11, y111]
 
 
 def fitness_function(gen):
@@ -293,6 +297,8 @@ def fitness_function(gen):
         for _v in range(len(Va)):
             for _m in range(len(m)):
                 for _t in range(len(t)):
+                    # print(c[_m][_a]) # [[0, 0], [1, 0]]
+                    # print(y[_a][_v][_m][_t]) # 80
                     purchas_cost += c[_m][_a] * y[_a][_v][_m][_t]
     for _e in range(len(e)):
         for _i in range(len(i)):
@@ -350,16 +356,53 @@ def fitness_function(gen):
     z = trans_cost + purchas_cost + prod_cost + maintain_cost + \
         shortage_cost + environ_cost + panalty_cost
 
-    print('z: ', z)
+    # print('z: ', z) # TODO: all are 386390 wired!
     if (z == 0):
-        return 9999999
+        return 9999999, z
     return 1/z, z
 
+# tournament selection or
+# parent selection base on best value
+def selection(pop, scores, k=3):
+    # first random selection
+    selection_ix = randint(len(pop))
+    for ix_123 in randint(0, len(pop), k - 1):
+        # check if better (e.g. perform a tournament)
+        if scores[ix_123] < scores[selection_ix]:
+            selection_ix = ix_123
+    return pop[selection_ix]
+
+# crossover two parents to create two children
+# by copy or mixing the parent (recombination)
+def crossover(p1, p2, r_cross):
+    # children are copies of parents by default
+    c1, c2 = p1.copy(), p2.copy()
+    # check for recombination
+    if rand() < r_cross:
+        # select crossover point that is not on the end of the string
+        pt = randint(1, len(p1) - 2)
+        # perform crossover
+        c1 = p1[:pt] + p2[pt:]
+        c2 = p2[:pt] + p1[pt:]
+    return [c1, c2]
+
+# mutation operator
+# by flipping the bits
+def mutation(bitstring, r_mut):
+    # for i in range(len(bitstring)):
+    #     # check for a mutation
+    #     if rand() < r_mut:
+    #         # flip the bit
+    #         bitstring[i] = 1 - bitstring[i]
+    do_mutaiton=0
 
 def ga():
     # define ga
-    global population_size
-    population_size = 100
+    global population_size, generation_size, mutation_rate, cross_rate
+    population_size = 1000
+    generation_size = 100
+    cross_rate = 0.9
+    mutation_rate = 0.3
 
     # define parameters
     global T, Tx, Txx, ct, cs, cf, cpxx, alpha, I, Ix, ch, Ts, Tsx, ck, fx, czx, Sp, chx, Spx, cab, BR, c, cx, cxx, vol, volx, volxx, cd, chxx, chxxx, cr, cz, dem, fxd, P, cinv, Cinvx, M, BigM, Hd, cp, cpx, boundaries
@@ -406,24 +449,87 @@ def ga():
     for _ in range(population_size):
         _random_pop = random_population(boundaries)
         init_pop.append(_random_pop)
+    
+    # z_fun=fitness_function(init_pop[0])
+    # print(z_fun)
+    # return
 
-    p1 = fitness_function(init_pop[0])
-    p2 = fitness_function(init_pop[1])
+    next_pop = []
+    best_of_each_gen=[0]
+    best, best_eval = 0, fitness_function(init_pop[0])[0]
+    optimize_value=0
 
-    score = 0
-    soln = []
-    if (p2[0] > p1[0]):
-        score = p2[1]
-        soln = init_pop[1]
-    else:
-        score = p1[1]
-        soln = init_pop[0]
+    for idx in range(generation_size):
+        curr_pop=[]
+        if idx == 0:
+            curr_pop = init_pop
+        else:
+             curr_pop = next_pop
 
-    print('score:', score)  # which has more fitness value
-    # print('soln gen:', soln)
+        # this_gen_topper = 0
+        # this_gen_topper_score = 0
+        this_gen_scrors = [fitness_function(curr_pop[pop_idx])[0] for pop_idx in range(population_size)]
 
-    res = _write_result(soln, score)
+        # check for new best solution
+        for indxx in range(population_size):
+            if this_gen_scrors[indxx] > best_eval:
+                best, best_eval = curr_pop[indxx], this_gen_scrors[indxx]
+                optimize_value = fitness_function(curr_pop[indxx])[1]
+                # this_gen_topper = best
+                # this_gen_topper_score = best_eval
+
+        selected = [selection(curr_pop, this_gen_scrors) for _ in range(population_size)]
+
+        children = list()
+        for idxe in range(0, population_size, 2):
+            # get selected parents in pairs
+            p1, p2 = selected[idxe], selected[idxe + 1]
+            # crossover and mutation
+            for cross_21 in crossover(p1, p2, cross_rate):
+                # mutation
+                mutation(cross_21, mutation_rate)
+                # store for next generation
+                children.append(cross_21)
+
+        # replace population
+        next_pop = children
+
+        # for pp in range(population_size):
+            
+            # _fitness = fitness_function(init_pop[pp])
+            # this_gen_scrors.append(_fitness[0])
+
+            # p1 = fitness_function(init_pop[0])
+            # p2 = fitness_function(init_pop[1])
+
+            # score = 0
+            # soln = []
+            # if (p2[0] > p1[0]):
+            #     score = p2[1]
+            #     soln = init_pop[1]
+            # else:
+            #     score = p1[1]
+            #     soln = init_pop[0]
+
+            # print('score:', score)  # which has more fitness value
+            # print('soln gen:', soln)
+
+        this_gen_scrors.sort()
+        this_gen_topper_score = this_gen_scrors[len(this_gen_scrors)-1]
+        best_of_each_gen.append(this_gen_topper_score)
+
+    # res = _write_result(soln, score)
+    # print(res)
+
+    res = _write_result(best, optimize_value)
     print(res)
 
+    xaxis = np.array(list(range(0,generation_size+1)))
+    yaxis = np.array(best_of_each_gen)
+    # print(xaxis)
+    # print(yaxis)
+    plt.plot(xaxis, yaxis)
+    print('Successfuly completed!')
+    plt.show()
 
 ga()
