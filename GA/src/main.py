@@ -1,4 +1,5 @@
 import random
+import time
 from numpy.random import randint
 from numpy.random import rand
 from cd import get as _cd
@@ -379,7 +380,7 @@ def fitness_function(gen):
                 try:
                     sum += u111[_e][_p][_t-1]
                 except:
-                    print('index out range')
+                    print('')
 
                 sum -= u111[_e][_p][_t]
 
@@ -394,8 +395,8 @@ def fitness_function(gen):
                     panalty_cost += abs(sum)* 2 # 200% palanty
                     # panalty_cost += 1000
                     # print('panalty 1000!')
-                else:
-                    print('constraint#1 fully meet!')
+                # else:
+                #     print('') # constraint#1 fully meet!
 
     # constraints #2
     # 'Recycled materials'
@@ -432,7 +433,7 @@ def fitness_function(gen):
         
         sum -= cp
 
-        print(sum)
+        # print(sum)
         if sum > 0:
             panalty_cost += abs(sum)*2
 
@@ -446,7 +447,7 @@ def fitness_function(gen):
         
         sum -= cpx
 
-        print(sum)
+        # print(sum)
         if sum > 0:
             panalty_cost += abs(sum)*2
 
@@ -464,7 +465,7 @@ def fitness_function(gen):
             # TODO: re-structure input
             sum -= cpxx[_b][0]
 
-            print(sum)
+            # print(sum)
             if sum > 0:
                 panalty_cost += abs(sum)*2
 
@@ -668,8 +669,8 @@ def fitness_function(gen):
                     # TypeError: 'int' object is not subscriptable
                     # meaning that you dis-order sequence
 
-                    print(wb[_e][_i][_j][_t])
-                    print(Ts[_e][_j])
+                    # print(wb[_e][_i][_j][_t])
+                    # print(Ts[_e][_j])
 
                     sum += wb[_e][_i][_j][_t]*Ts[_e][_j]
                 sum -= Hd
@@ -812,10 +813,11 @@ def mutation(bitstring, r_mut):
 
 
 def ga():
+    start_time = time.time()
     # define ga
     global population_size, generation_size, mutation_rate, cross_rate
-    population_size = 10
-    generation_size = 5
+    population_size = 1000
+    generation_size = 30
     cross_rate = 0.9
     mutation_rate = 0.3
 
@@ -934,19 +936,20 @@ def ga():
         this_gen_scrors.sort()
         this_gen_topper_score = this_gen_scrors[len(this_gen_scrors)-1]
         best_of_each_gen.append(this_gen_topper_score)
+        print('gen#: ', idx+1)
 
     # res = _write_result(soln, score)
     # print(res)
 
-    # res = _write_result(best, optimize_value)
-    # print(res)
+    res = _write_result(best, optimize_value)
+    print(res)
 
     xaxis = np.array(list(range(0, generation_size+1)))
     yaxis = np.array(best_of_each_gen)
     # # print(xaxis)
     # # print(yaxis)
     plt.plot(xaxis, yaxis)
-    print('Successfuly completed!')
+    print("Completed! in: %.2fs" % (time.time() - start_time))
     plt.show()
 
 
