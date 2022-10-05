@@ -1,0 +1,14 @@
+:global(body) {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+:global(a) {
+  color: #B4B4B4;
+  text-decoration: none;
+}
+
+:global(h2) {
+  margin: 0;
+}

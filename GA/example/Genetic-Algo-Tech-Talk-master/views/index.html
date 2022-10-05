@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Genetic TSP</title>
+  <style>body{background-color: #f8f8f1; font-size: 22px}</style>
+  <style>button{font-size:22px}</style>
+  <script src="/bundle.js" defer></script>
+</head>
+<body>
+  <div>
+
+    <div style="display: inline-block">
+      <canvas id="genetic" width="500" height="500" style="border:1px solid #d3d3d3;">
+        Your browser does not support the canvas element.
+      </canvas>
+    </div>
+
+    <div style="display: inline-block; width: 750px">
+      <div style="display: inline-block; width: 380px">
+        <div>
+          <span>Current # generations: </span>
+          <output id="genNumber">0</output>
+        </div>
+        <div>
+          <span>Current shortest distance: </span>
+          <output id="shortestNow">0</output>
+        </div>        
+        <div>
+          <span>Generations to achieve shortest-ever: </span>
+          <output id="fittestGens">0</output>
+        </div>
+        <div>
+          <span>Shortest distance ever: </span>
+          <output id="shortestEver">0</output>
+        </div>
+      </div>
+
+      <canvas id="best" width="250" height="250" style="border:1px solid #d3d3d3;"></canvas> 
+
+      <div style="width: 750px; overflow: scroll">
+        <canvas id="fitness" width="10000" height="300"
+        style="border:1px solid #d3d3d3;">
+        </canvas>
+      </div>
+    </div>
+    
+    <div>
+      <button id="play">Play</button>
+      <button id="pause">Pause</button>
+      <button id="reset">Clear and Reset</button>
+      <button id="step">Step</button>
+      <button id="config">DEFAULT CONFIG</button>
+    </div>
+    <div style="display: inline-block; width: 600px">
+      <div>
+        <span>Step Interval (ms)</span>
+        <input type="range" id="intervalIn" max="500" step="10">
+        <output id="intervalOut"></output>
+      </div>
+      <div>
+        <span>Population Size</span>
+        <input type="range" id="popSizeIn" max="100" step="1">
+        <output id="popSizeOut"></output>
+      </div>
+        <span>Crossover Chance</span>
+        <input type="range" id="pCrossIn" max="1" step=".01">
+        <output id="pCrossOut"></output>
+      <div>
+        <span>Mutation Chance</span>
+        <input type="range" id="pMutateIn" max="1" step=".01">
+        <output id="pMutateOut"></output>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
+

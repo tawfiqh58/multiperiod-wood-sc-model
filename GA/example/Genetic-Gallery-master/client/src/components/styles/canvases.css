@@ -1,0 +1,15 @@
+.container {
+  display: flex;
+  margin-top: 5px;
+  justify-content: center;
+}
+
+.canvasCard {
+  composes: canvasCard from './imgCanvas.css';
+}
+
+@media (max-width: 654px) {
+  .container {
+    flex-wrap: wrap;
+  }
+}
