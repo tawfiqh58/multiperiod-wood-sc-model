@@ -19,7 +19,7 @@ def write(gen, value):
     i = [1, 2]
     ix = [1, 2]
     ixx = [1, 2]
-    j = [1, 2, 3, 4, 5]
+    j = [1, 2, 3, 4, 5] # collection-center
     ij = [1, 2]
     hj = [1, 2]
     m = [1, 2, 3] # material

@@ -800,17 +800,23 @@ def crossover(p1, p2, r_cross):
     return [c1, c2]
 
 # mutation operator
-# by flipping the bits
-
-
-def mutation(bitstring, r_mut):
-    # for i in range(len(bitstring)):
-    #     # check for a mutation
-    #     if rand() < r_mut:
-    #         # flip the bit
-    #         bitstring[i] = 1 - bitstring[i]
-    do_mutaiton = 0
-
+# reversion and swap method
+# pass parent1 for child1
+# pass parent2 for child2
+def mutation(p, child, r_mut):
+    # randomly choose 2 index between gen len
+    # swap index from parent to child
+    
+    indexx_1_mut = random.randint(0,  len(p)-1)
+    indexx_2_mut = random.randint(0,  len(p)-1)
+    if rand() < r_mut:
+        # swap the index
+        child[indexx_1_mut] = p[indexx_1_mut]
+        child[indexx_2_mut] = p[indexx_2_mut]
+        
+    # reversion you can do a loop
+    # index1+1 index2-1
+    # swap index from parent to child
 
 def ga():
     start_time = time.time()
@@ -849,7 +855,7 @@ def ga():
     i = [1, 2]
     ix = [1, 2]
     ixx = [1, 2]
-    j = [1, 2, 3, 4, 5]
+    j = [1, 2, 3, 4, 5] # collection-center
     ij = [1, 2]
     hj = [1, 2]
     m = [1, 2, 3] # material
@@ -904,11 +910,16 @@ def ga():
             # get selected parents in pairs
             p1, p2 = selected[idxe], selected[idxe + 1]
             # crossover and mutation
+            mut_indx=0
             for cross_21 in crossover(p1, p2, cross_rate):
                 # mutation
-                mutation(cross_21, mutation_rate)
+                if mut_indx==0:
+                    mutation(p1, cross_21, mutation_rate)
+                else:
+                    mutation(p2, cross_21, mutation_rate)
                 # store for next generation
                 children.append(cross_21)
+                mut_indx+=1
 
         # replace population
         next_pop = children
