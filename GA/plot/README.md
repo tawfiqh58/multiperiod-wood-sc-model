@@ -1,4 +1,0 @@
-#
-
-install
-$ pip install matplotlib

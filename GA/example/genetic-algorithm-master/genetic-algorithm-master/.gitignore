@@ -1,7 +1,0 @@
-*.ipynb_checkpoints
-*.vscode
-__pycache__
-*.ipynb
-ga_modules.py
-*.lock
-.venv
