@@ -1,11 +1,13 @@
 Sets
     i /a,b,c/;
 
-Variables
-    C(i)
-    P(i)
+Positive Variable
+    C(i);
+Binary Variable
     B(i);
-Free Variables z;
+Integer Variable
+    P(i);
+Free Variable z;
 
 Equations
     cost
