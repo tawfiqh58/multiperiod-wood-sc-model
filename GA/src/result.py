@@ -9,26 +9,26 @@ def write(gen, value):
     # Start from the first cell. Rows and columns are zero indexed.
     row = 0
 
-    a = [1, 2]
-    b = [1, 2]
-    e = [1, 2]
-    eb = [1, 2]
+    a = [1, 2, 3] # supplier
+    b = [1, 2, 3, 4, 5] # wholesaler
+    e = [1, 2, 3, 4, 5] # retailer
+    eb = [1, 2, 3, 4, 5]
     f = [1, 2]
     g = [1, 2]
     Gb = [1, 2]
     i = [1, 2]
     ix = [1, 2]
     ixx = [1, 2]
-    j = [1, 2]
-    ij = [1, 2, 3, 4]
+    j = [1, 2, 3, 4, 5]
+    ij = [1, 2]
     hj = [1, 2]
-    m = [1, 2]
-    p = [1, 2]
+    m = [1, 2, 3] # material
+    p = [1, 2, 3] # product
     t = [1, 2]
     v = [1, 2]
     Va = [1, 2]
-    Bapm = [1, 2, 3, 4]
-    ixj = [1, 2, 3, 4]
+    Bapm = [1, 2, 3]
+    ixj = [1, 2]
 
     x = gen[0]
     x1 = gen[1]
@@ -279,7 +279,7 @@ def write(gen, value):
                 for _t in range(len(t)):
                     ws.write(row, 2, 'material ' + str(_m + 1))
                     ws.write(row, 3, 'day ' + str(_t + 1))
-                    ws.write(row, 4, y[_ix][_j][_m][_t])
+                    ws.write(row, 4, y[_a][_v][_m][_t])
                     row += 1
     row += 1
     ws.write(row, 0, "y1(p,t) The number of manufactured products p by the factory on day t")
@@ -303,7 +303,7 @@ def write(gen, value):
                 for _t in range(len(t)):
                     ws.write(row, 2, 'product ' + str(_p + 1))
                     ws.write(row, 3, 'day ' + str(_t + 1))
-                    ws.write(row, 4, y11[_v][_g][_p][_t])
+                    ws.write(row, 4, y11[_b][_g][_p][_t])
                     row += 1
     
     row += 1
