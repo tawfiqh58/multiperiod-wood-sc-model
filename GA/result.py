@@ -1,7 +1,7 @@
 import xlsxwriter
 
 
-def write(gen, value):
+def write(gen, value, analysis_value):
     # Create a workbook and add a worksheet.
     doc = xlsxwriter.Workbook('result.xlsx')
     ws = doc.add_worksheet()
@@ -62,6 +62,31 @@ def write(gen, value):
     ws.write(row, 0, 'Min.')
     ws.write(row, 1, value)
     row += 2
+    
+    ws.write(row, 0, 'Analysis')
+    for _indx in range(len(analysis_value)): # sequence: trans, purchas, prod, mainten, short, envir
+        if _indx == 0:
+            ws.write(row, 0, 'Transportation Cost')
+            ws.write(row, 1, analysis_value[0])
+        elif _indx == 1:
+            ws.write(row, 0, 'Purchasing Cost')
+            ws.write(row, 1, analysis_value[1])
+        elif _indx == 2:
+            ws.write(row, 0, 'Production Cost')
+            ws.write(row, 1, analysis_value[2])
+        elif _indx == 3:
+            ws.write(row, 0, 'Maintenance Cost')
+            ws.write(row, 1, analysis_value[3])
+        elif _indx == 4:
+            ws.write(row, 0, 'Shortage Cost')
+            ws.write(row, 1, analysis_value[4])
+        elif _indx == 5:
+            ws.write(row, 0, 'Environmental Cost')
+            ws.write(row, 1, analysis_value[5])
+        
+        row += 1
+
+    row += 1
     
     ws.write(row, 0, "w(a,v,t) The number of trip of vehicle v from supplier a to factory on day t")
     row += 1

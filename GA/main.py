@@ -764,11 +764,11 @@ def fitness_function(gen):
     # objective function
     z = trans_cost + purchas_cost + prod_cost + maintain_cost + \
         shortage_cost + environ_cost + panalty_cost
-
+    analysis_result = (trans_cost, purchas_cost, prod_cost, maintain_cost, shortage_cost, environ_cost)
     # print('z: ', z) # TODO: all are 386390 wired!
     if (z == 0):
         return 9999999, z
-    return 1/z, z
+    return 1/z, z, analysis_result
 
 # tournament selection or
 # parent selection base on best value
@@ -881,6 +881,7 @@ def ga():
     best_of_each_gen = [0]
     best, best_eval = 0, fitness_function(init_pop[0])[0]
     optimize_value = 0
+    analysis_value = (0,0,0,0,0,0) # trans, purchas, prod, mainten, short, envir
 
     for idx in range(generation_size):
         curr_pop = []
@@ -898,7 +899,9 @@ def ga():
         for indxx in range(population_size):
             if this_gen_scrors[indxx] > best_eval:
                 best, best_eval = curr_pop[indxx], this_gen_scrors[indxx]
-                optimize_value = fitness_function(curr_pop[indxx])[1]
+                _fit_val =fitness_function(curr_pop[indxx])
+                optimize_value = _fit_val[1]
+                analysis_value = _fit_val[2]
                 # this_gen_topper = best
                 # this_gen_topper_score = best_eval
 
@@ -952,7 +955,7 @@ def ga():
     # res = _write_result(soln, score)
     # print(res)
 
-    res = _write_result(best, optimize_value)
+    res = _write_result(best, optimize_value, analysis_value)
     print(res)
 
     xaxis = np.array(list(range(0, generation_size+1)))
