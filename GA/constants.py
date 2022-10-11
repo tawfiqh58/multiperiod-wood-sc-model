@@ -13,7 +13,7 @@ def get():
     cpx = 0
 
     # assign values
-    for i in range(2, ws.max_row+1):
+    for i in range(1, ws.max_row+1):
 
         if (str(ws.cell(i, 1).value) == 'cinv'):
             cinv = ws.cell(i, 2).value

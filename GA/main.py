@@ -341,18 +341,23 @@ def fitness_function(gen):
                 shortage_cost += P[_e][_p][_t]*bo[_e][_p][_t]
     # print('shortage cost: ', shortage_cost)
 
-    environ_cost = 0
+    environ_cost_1 = 0
     for _a in range(len(a)):
         for _v in range(len(v)):
             for _m in range(len(m)):
                 for _t in range(len(t)):
-                    environ_cost += y[_a][_v][_m][_t]
+                    # print(y[_a][_v][_m][_t])
+                    environ_cost_1 += y[_a][_v][_m][_t] # raw from supp to fac
+    environ_cost_2 = 0
     for _ix in range(len(ix)):
         for _j in range(len(j)):
             for _m in range(len(m)):
                 for _t in range(len(t)):
-                    environ_cost -= yb1[_ix][_j][_m][_t]
-    # print('environ cost: ', shortage_cost)
+                    # print(yb1[_ix][_j][_m][_t])
+                    environ_cost_2 += yb1[_ix][_j][_m][_t] # raw from coll to fac
+    environ_cost = (cinv * environ_cost_1) - (Cinvx * environ_cost_2) # cinv cost of tree cut, cinvx benifit of tree saving
+    print(cinv,environ_cost_1, environ_cost_2,Cinvx)
+    print('environ cost: ',(cinv * environ_cost_1),(Cinvx * environ_cost_2), environ_cost)
 
     # constraints
     panalty_cost = 0
@@ -822,8 +827,8 @@ def ga():
     start_time = time.time()
     # define ga
     global population_size, generation_size, mutation_rate, cross_rate
-    population_size = 1000
-    generation_size = 50
+    population_size = 10
+    generation_size = 2
     cross_rate = 0.9
     mutation_rate = 0.3
 
