@@ -278,8 +278,6 @@ def fitness_function(gen):
                 for _p in range(len(p)):
                     for _t in range(len(t)):
                         trans_cost += cz[_e][_j][_p]*yb[_e][_i][_j][_p][_t]
-    # print(fx) # ([60], [60])
-    # print(xb1) # [[[0, 0], [1, 0]], [[0, 1], [0, 1]]]
     for _ix in range(len(ix)):
         for _j in range(len(j)):
             for _t in range(len(t)):
@@ -292,15 +290,12 @@ def fitness_function(gen):
             for _m in range(len(m)):
                 for _t in range(len(t)):
                     trans_cost += czx[_j][_m]*yb1[_ix][_j][_m][_t]
-    # print('transportation cost: ', trans_cost)
 
     purchas_cost = 0
     for _a in range(len(a)):
         for _v in range(len(Va)):
             for _m in range(len(m)):
                 for _t in range(len(t)):
-                    # print(c[_m][_a]) # [[0, 0], [1, 0]]
-                    # print(y[_a][_v][_m][_t]) # 80
                     purchas_cost += c[_m][_a] * y[_a][_v][_m][_t]
     for _e in range(len(e)):
         for _i in range(len(i)):
@@ -308,14 +303,12 @@ def fitness_function(gen):
                 for _p in range(len(p)):
                     for _t in range(len(t)):
                         purchas_cost += ck[_e][_p]*yb[_e][_i][_j][_p][_t]
-    # print('purchasing cost: ', purchas_cost)
 
     prod_cost = 0
     for _p in range(len(p)):
         for _t in range(len(t)):
             # TODO: single line input data re-structure
             prod_cost += ct[_p][0]*y1[_p][_t]
-    # print('production cost: ', prod_cost)
 
     maintain_cost = 10
     for _m in range(len(m)):
@@ -332,48 +325,28 @@ def fitness_function(gen):
         for _p in range(len(p)):
             for _t in range(len(t)):
                 maintain_cost += chxxx[_e][_p][_t]*u111[_e][_p][_t]
-    # print('maintain cost: ', maintain_cost)
 
     shortage_cost = 0
     for _e in range(len(e)):
         for _p in range(len(p)):
             for _t in range(len(t)):
                 shortage_cost += P[_e][_p][_t]*bo[_e][_p][_t]
-    # print('shortage cost: ', shortage_cost)
 
     environ_cost_1 = 0
     for _a in range(len(a)):
         for _v in range(len(v)):
             for _m in range(len(m)):
                 for _t in range(len(t)):
-                    # print(y[_a][_v][_m][_t])
-                    environ_cost_1 += y[_a][_v][_m][_t] # raw from supp to fac
+                    environ_cost_1 += y[_a][_v][_m][_t]
     environ_cost_2 = 0
     for _ix in range(len(ix)):
         for _j in range(len(j)):
             for _m in range(len(m)):
                 for _t in range(len(t)):
-                    # print(yb1[_ix][_j][_m][_t])
-                    environ_cost_2 += yb1[_ix][_j][_m][_t] # raw from coll to fac
-    environ_cost = (cinv * environ_cost_1) - (Cinvx * environ_cost_2) # cinv cost of tree cut, cinvx benifit of tree saving
-    print(cinv,environ_cost_1, environ_cost_2,Cinvx)
-    print('environ cost: ',(cinv * environ_cost_1),(Cinvx * environ_cost_2), environ_cost)
+                    environ_cost_2 += yb1[_ix][_j][_m][_t]
+    environ_cost = (cinv * environ_cost_1) - (Cinvx * environ_cost_2)
 
-    # constraints
     panalty_cost = 0
-    # TODO: add all constraints
-    # if anyone of them not meet then add panalty for that soln
-
-    # constraints #1
-    # 'Wastage return products'
-    #
-    # yIII is the number of product transported [veh-whol-retail-day]
-    # 𝑢III is the storagte inventory of retailer
-    # BR is the % of product that returns from retailer
-    # yb is the amount of wooden waste sent from retailer to collection center
-    #
-    # yIII, uIII, yb
-    # (∑∑𝑦III+𝑢III(t-1)−𝑢III)𝐵𝑅 = ∑∑𝑦𝑏; ∀e∈E,p∈P,t∈T
     for _e in range(len(e)):
         for _p in range(len(p)):
             for _t in range(len(t)):
@@ -404,14 +377,6 @@ def fitness_function(gen):
                 #     print('') # constraint#1 fully meet!
 
     # constraints #2
-    # 'Recycled materials'
-    #
-    # 𝛼 material consumption coefficient
-    # yb is the amount of wooden waste sent from retailer to collection center
-    # ybI is the amount of raw material sent from collection center to factory
-    #
-    # yb, ybI
-    # ∑∑∑𝛼*𝑦𝑏 = ∑𝑦𝑏I; ∀m∈M,j∈J,t∈T
     for _m in range(len(m)):
         for _j in range(len(j)):
             for _t in range(len(t)):
@@ -827,8 +792,8 @@ def ga():
     start_time = time.time()
     # define ga
     global population_size, generation_size, mutation_rate, cross_rate
-    population_size = 10
-    generation_size = 2
+    population_size = 1000
+    generation_size = 50
     cross_rate = 0.9
     mutation_rate = 0.3
 
