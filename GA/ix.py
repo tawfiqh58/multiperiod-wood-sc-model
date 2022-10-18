@@ -3,7 +3,7 @@ from openpyxl import load_workbook
 
 
 def get(e):
-    doc = load_workbook(filename='ixj.xlsx')
+    doc = load_workbook(filename='ix.xlsx')
 
     ws = doc.active
     data = []

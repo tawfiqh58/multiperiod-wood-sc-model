@@ -4,6 +4,7 @@ from numpy.random import randint
 from numpy.random import rand
 from index import get as _index
 from hj import get as _hj
+from ix import get as _ix
 from eb import get as _eb
 from Gb import get as _Gb
 from ij import get as _ij
@@ -62,9 +63,39 @@ def random_population(boundary):
                 for day in range(len(t)):
                     xb[wholesaler][vehicle][collection][day] = random.randint(
                         0, 1)
+    # TODO: re-assign positional value
+    xb1 = [[[0 for wwx in range(len(t))] for ww in range(len(ix[wv]))] for wv in range(len(j))]
+    
+    for collection in range(len(j)):
+        for vehicle in range(len(ix[collection])):
+            # we are guessing the solution here
 
-    xb1 = [[[0 for wwx in range(len(t))] for wv in range(len(j))]
-           for ww in range(len(ix))]
+            # if vehicle ok
+            # then gen will contain that value
+            # xb1[collection-center][vehicle-id][day]
+            # xb1[collection-all][vehicle-all][day-all]
+
+            # when loop
+            # will take this value to multiply something
+            # so it need to match with that index
+
+            # for example
+            # if ix[_j][_ix]==1:
+            # then only ++
+
+            # that's mean what gen I will get will only has
+            # that range of ix and I have to interpret it
+            # as that number of vehicle from the index assign
+
+            # but if i reduce index number will it affect in whole
+            # calculation?
+
+            # if we manipulate it here maybe we don't need to
+            # worry about it in next use
+            if ix[collection][vehicle]==1:
+                for day in range(len(t)):
+                    xb1[collection][vehicle][day] = random.randint(0, 1)
+    
     for vehicle in range(len(ix)):
         for collection in range(len(j)):
             for day in range(len(t)):
@@ -288,13 +319,14 @@ def fitness_function(gen):
                 for _p in range(len(p)):
                     for _t in range(len(t)):
                         trans_cost += cz[_e][_j][_p]*yb[_e][_i][_j][_p][_t]
-    for _ix in range(len(ix)):
-        for _j in range(len(j)):
-            for _t in range(len(t)):
-                # TODO: fix range issue
-                # vehicle loop insert
-                # trans_cost += fx[_ix][_j]*xb1[_ix][_j][_t]
-                trans_cost += fx[_j][0]*xb1[_ix][_j][_t]
+    for _j in range(len(j)):
+        for _ix in range(len(ix[_j])):
+            if ix[_j][_ix]==1:
+                for _t in range(len(t)):
+                    # TODO: fix range issue
+                    # vehicle loop insert
+                    # trans_cost += fx[_ix][_j]*xb1[_ix][_j][_t]
+                    trans_cost += fx[_j][0]*xb1[_j][_ix][_t]
     for _ix in range(len(ix)):
         for _j in range(len(j)):
             for _m in range(len(m)):
@@ -485,8 +517,9 @@ def fitness_function(gen):
                     sum += y[_a][_v][_m][_t]
             
             for _j in range(len(j)):
-                for _ix in range(len(ix)):
-                    sum += yb1[_ix][_j][_m][_t]
+                for _ix in range(len(ix[_j])):
+                    if ix[_j][_ix]==1:
+                        sum += yb1[_ix][_j][_m][_t]
             
             try:
                 sum += u1[_m][_t-1]
@@ -850,7 +883,8 @@ def ga():
     # Bapm = [1, 2, 3]
     # ixj = [1, 2]
 
-    a, b, e, f, g, i, ix, j, m, p, t, v = _index()
+    a, b, e, f, g, i, j, m, p, t, v = _index()
+    ix = _ix(i)
     hj = _hj(j)
     eb = _eb(e)
     Gb = _Gb(g)
