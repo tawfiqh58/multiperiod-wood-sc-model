@@ -3,6 +3,7 @@ import time
 from numpy.random import randint
 from numpy.random import rand
 from index import get as _index
+from hj import get as _hj
 from eb import get as _eb
 from Gb import get as _Gb
 from ij import get as _ij
@@ -317,7 +318,7 @@ def fitness_function(gen):
     prod_cost = 0
     for _p in range(len(p)):
         for _t in range(len(t)):
-            # TODO: re-structure single line data input
+            # TODO: re-structure input for single data
             prod_cost += ct[_p][0]*y1[_p][_t]
 
     maintain_cost = 10
@@ -599,13 +600,14 @@ def fitness_function(gen):
     # constraints #13
     for _j in range(len(j)):
         for _i in range(len(i)):
-            for _e in range(len(hj)):
-                for _t in range(len(t)):
-                    sum = 0
-                    sum += wb[_e][_i][_j][_t]
-                    sum -= M*xb[_e][_i][_j][_t]
-                    if sum > 0:
-                        panalty_cost += abs(sum)*2
+            for _e in range(len(hj[_j])):
+                if hj[_e]==1:
+                    for _t in range(len(t)):
+                        sum = 0
+                        sum += wb[_e][_i][_j][_t]
+                        sum -= M*xb[_e][_i][_j][_t]
+                        if sum > 0:
+                            panalty_cost += abs(sum)*2
 
     # constraints #14
     for _a in range(len(a)):
@@ -648,16 +650,17 @@ def fitness_function(gen):
             if ij[_i]==1:
                 for _t in range(len(t)):
                     sum = 0
-                    for _e in range(len(e)): # TODO: hj
-                        # TODO: re-structure input
-                        
-                        # TypeError: 'int' object is not subscriptable
-                        # meaning that you dis-order sequence
+                    for _e in range(len(hj[_j])):
+                        if hj[_e]==1:
+                            # TODO: re-structure input
+                            
+                            # TypeError: 'int' object is not subscriptable
+                            # meaning that you dis-order sequence
 
-                        # print(wb[_e][_i][_j][_t])
-                        # print(Ts[_e][_j])
+                            # print(wb[_e][_i][_j][_t])
+                            # print(Ts[_e][_j])
+                            sum += wb[_e][_i][_j][_t]*Ts[_e][_j]
 
-                        sum += wb[_e][_i][_j][_t]*Ts[_e][_j]
                     sum -= Hd
                     if sum > 0:
                         panalty_cost += abs(sum)*2
@@ -717,7 +720,7 @@ def fitness_function(gen):
                                 panalty_cost += abs(sum)*2
 
     # constraints #22
-    for _e in range(len(e)): # TODO: Ej
+    for _e in range(len(e)): # TODO: Define Ej
         for _j in range(len(j)):
             for _i in range(len(ij[_j])):
                 if ij[_i]==1:
@@ -747,7 +750,6 @@ def fitness_function(gen):
     z = trans_cost + purchas_cost + prod_cost + maintain_cost + \
         shortage_cost + environ_cost + panalty_cost
     analysis_result = (trans_cost, purchas_cost, prod_cost, maintain_cost, shortage_cost, environ_cost)
-    # print('z: ', z) # TODO: all are 386390 wired!
     if (z == 0):
         return 9999999, z
     return 1/z, z, analysis_result
@@ -821,7 +823,7 @@ def ga():
     P = _P()
     cinv, Cinvx, M, BigM, Hd, cp, cpx = _constants()
     T, Tx, Txx, ct, cs, cf, cpxx, alpha, I, Ix, ch, Ts, Tsx, ck, fx, czx, Sp, chx, Spx, cab, BR, c, cx, cxx, vol, volx, volxx = _normal_table()
-    boundaries = []  # TODO: pass bound from here and input bound from sheet
+    boundaries = []  # TODO: Use this variable to pass bound take input bound from worksheet
     # ---
 
     # define index size
@@ -848,13 +850,14 @@ def ga():
     # Bapm = [1, 2, 3]
     # ixj = [1, 2]
 
-    a, b, e, f, g, i, ix, j, hj, m, p, t, v = _index()
+    a, b, e, f, g, i, ix, j, m, p, t, v = _index()
+    hj = _hj(j)
     eb = _eb(e)
     Gb = _Gb(g)
-    ij = _ij(i) # TODO
+    ij = _ij(i)
     Va = _Va(v)
-    ixj = _ixj(i) # TODO
-    Bapm = _Bapm(m) # TODO
+    ixj = _ixj(i) # TODO: Fix ixj
+    Bapm = _Bapm(m) # TODO: Fix Bapm
     # ---
 
     init_pop = []
