@@ -79,6 +79,3 @@ def get():
                     v.append(_+1)
 
     return a, b, e, f, g, i, ix, j, hj, m, p, t, v
-
-
-print(get())

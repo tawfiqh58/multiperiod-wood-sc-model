@@ -2,6 +2,13 @@ import random
 import time
 from numpy.random import randint
 from numpy.random import rand
+from index import get as _index
+from eb import get as _eb
+from Gb import get as _Gb
+from ij import get as _ij
+from Va import get as _Va
+from ixj import get as _ixj
+from Bapm import get as _Bapm
 from cd import get as _cd
 from chxx import get as _chxx
 from chxxx import get as _chxxx
@@ -239,14 +246,16 @@ def fitness_function(gen):
 
     trans_cost = 0
     for _a in range(len(a)):
-        for _v in range(len(Va)):  # TODO: can check Belongs to
-            for _t in range(len(t)):
-                trans_cost += cx[_a][_v] * x[_a][_v][_t]
-    for _a in range(len(a)):
-        for _v in range(len(Va)):
-            for _m in range(len(m)):
+        for _v in range(len(Va[_a])):
+            if Va[_v]==1:
                 for _t in range(len(t)):
-                    trans_cost += cxx[_a][_m] * y[_a][_v][_m][_t]
+                    trans_cost += cx[_a][_v] * x[_a][_v][_t]
+    for _a in range(len(a)):
+        for _v in range(len(Va[_a])):
+            if Va[_v]==1:
+                for _m in range(len(m)):
+                    for _t in range(len(t)):
+                        trans_cost += cxx[_a][_m] * y[_a][_v][_m][_t]
     for _b in range(len(b)):
         for _f in range(len(f)):
             for _t in range(len(t)):
@@ -293,10 +302,11 @@ def fitness_function(gen):
 
     purchas_cost = 0
     for _a in range(len(a)):
-        for _v in range(len(Va)):
-            for _m in range(len(m)):
-                for _t in range(len(t)):
-                    purchas_cost += c[_m][_a] * y[_a][_v][_m][_t]
+        for _v in range(len(Va[_a])):
+            if Va[_v]==1:
+                for _m in range(len(m)):
+                    for _t in range(len(t)):
+                        purchas_cost += c[_m][_a] * y[_a][_v][_m][_t]
     for _e in range(len(e)):
         for _i in range(len(i)):
             for _j in range(len(j)):
@@ -307,7 +317,7 @@ def fitness_function(gen):
     prod_cost = 0
     for _p in range(len(p)):
         for _t in range(len(t)):
-            # TODO: single line input data re-structure
+            # TODO: re-structure single line data input
             prod_cost += ct[_p][0]*y1[_p][_t]
 
     maintain_cost = 10
@@ -575,14 +585,16 @@ def fitness_function(gen):
 
     # constraints #12
     for _b in range(len(b)):
-        for _e in range(len(eb)):
-            for _g in range(len(Gb)):
-                for _t in range(len(t)):
-                    sum = 0
-                    sum += w11[_b][_e][_g][_t]
-                    sum -= BigM*x11[_b][_e][_g][_t]
-                    if sum > 0:
-                        panalty_cost += abs(sum)*2
+        for _e in range(len(eb[_b])):
+            if eb[_e]==1:
+                for _g in range(len(Gb[_b])):
+                    if Gb[_g]==1:
+                        for _t in range(len(t)):
+                            sum = 0
+                            sum += w11[_b][_e][_g][_t]
+                            sum -= BigM*x11[_b][_e][_g][_t]
+                            if sum > 0:
+                                panalty_cost += abs(sum)*2
 
     # constraints #13
     for _j in range(len(j)):
@@ -597,14 +609,15 @@ def fitness_function(gen):
 
     # constraints #14
     for _a in range(len(a)):
-        for _v in range(len(Va)):
-            for _t in range(len(t)):
-                sum = 0
-                # TODO: re-structure input
-                sum += w[_a][_v][_t]*T[_a][0]
-                sum -= Hd*x[_a][_v][_t]
-                if sum > 0:
-                        panalty_cost += abs(sum)*2
+        for _v in range(len(Va[_a])):
+            if Va[_v]==1:
+                for _t in range(len(t)):
+                    sum = 0
+                    # TODO: re-structure input
+                    sum += w[_a][_v][_t]*T[_a][0]
+                    sum -= Hd*x[_a][_v][_t]
+                    if sum > 0:
+                            panalty_cost += abs(sum)*2
 
     # constraints #15
     for _f in range(len(f)):
@@ -619,117 +632,116 @@ def fitness_function(gen):
 
     # constraints #16
     for _b in range(len(b)):
-        for _g in range(len(Gb)):
-            for _t in range(len(t)):
-                sum = 0
-                for _e in range(len(e)):
-                    sum += w11[_b][_e][_g][_t]*Txx[_b][_e]
-                sum -= Hd
-                if sum > 0:
-                    panalty_cost += abs(sum)*2
+        for _g in range(len(Gb[_b])):
+            if Gb[_g]==1:
+                for _t in range(len(t)):
+                    sum = 0
+                    for _e in range(len(e)):
+                        sum += w11[_b][_e][_g][_t]*Txx[_b][_e]
+                    sum -= Hd
+                    if sum > 0:
+                        panalty_cost += abs(sum)*2
 
     # constraints #17
-    for _i in range(len(i)): # TODO: ij giving out of range
-        for _j in range(len(j)):
-            for _t in range(len(t)):
-                sum = 0
-                for _e in range(len(e)): # TODO: hj
-                    # TODO: re-structure input
-                    
-                    # TypeError: 'int' object is not subscriptable
-                    # meaning that you dis-order sequence
+    for _j in range(len(j)):
+        for _i in range(len(ij[_j])):
+            if ij[_i]==1:
+                for _t in range(len(t)):
+                    sum = 0
+                    for _e in range(len(e)): # TODO: hj
+                        # TODO: re-structure input
+                        
+                        # TypeError: 'int' object is not subscriptable
+                        # meaning that you dis-order sequence
 
-                    # print(wb[_e][_i][_j][_t])
-                    # print(Ts[_e][_j])
+                        # print(wb[_e][_i][_j][_t])
+                        # print(Ts[_e][_j])
 
-                    sum += wb[_e][_i][_j][_t]*Ts[_e][_j]
-                sum -= Hd
-                if sum > 0:
-                    panalty_cost += abs(sum)*2
+                        sum += wb[_e][_i][_j][_t]*Ts[_e][_j]
+                    sum -= Hd
+                    if sum > 0:
+                        panalty_cost += abs(sum)*2
                     
     # constraints #18
-    for _ix in range(len(ix)): # TODO: ij giving out of range
-        for _j in range(len(j)):
-            for _t in range(len(t)):
-                sum = 0
-                # TODO: re-structure input
-                sum += wb1[_ix][_j][_t]*Tsx[_j][0]
-                sum -= Hd*xb1[_ix][_j][_t]
-                if sum > 0:
-                    panalty_cost += abs(sum)*2
+    for _j in range(len(j)):
+        for _ix in range(len(ij[_j])):
+            if ij[_ix]==1:
+                for _t in range(len(t)):
+                    sum = 0
+                    # TODO: re-structure input
+                    sum += wb1[_ix][_j][_t]*Tsx[_j][0]
+                    sum -= Hd*xb1[_ix][_j][_t]
+                    if sum > 0:
+                        panalty_cost += abs(sum)*2
 
     # constraints #19
     for _a in range(len(a)):
-        for _v in range(len(Va)):
-            for _t in range(len(t)):
-                sum = 0
-                for _m in range(len(m)):
-                    # TODO: ij giving out of range
-                    sum += I[_m][0]*y[_a][_v][_m][_t]
+        for _v in range(len(Va[_a])):
+            if Va[_v]==1:
+                for _t in range(len(t)):
+                    sum = 0
+                    for _m in range(len(m)):
+                        sum += I[_m][0]*y[_a][_v][_m][_t]
 
-                # TODO: ij giving out of range
-                sum -= vol[_v][0]*w[_a][_v][_t]
-                if sum > 0:
-                    panalty_cost += abs(sum)*2
+                    sum -= vol[_v][0]*w[_a][_v][_t]
+                    if sum > 0:
+                        panalty_cost += abs(sum)*2
 
     # constraints #20
     for _b in range(len(b)):
         for _f in range(len(f)):
-            for _g in range(len(Gb)):
-                for _t in range(len(t)):
-                    sum = 0
-                    for _p in range(len(p)):
-                        # TODO: ij giving out of range
-                        sum += Ix[_p][0]*y11[_b][_g][_p][_t]
+            for _g in range(len(Gb[_b])):
+                if Gb[_g]==1:
+                    for _t in range(len(t)):
+                        sum = 0
+                        for _p in range(len(p)):
+                            sum += Ix[_p][0]*y11[_b][_g][_p][_t]
 
-                    # TODO: ij giving out of range
-                    sum -= volx[_f][0]*w1[_b][_f][_t]
-                    if sum > 0:
-                        panalty_cost += abs(sum)*2
+                        sum -= volx[_f][0]*w1[_b][_f][_t]
+                        if sum > 0:
+                            panalty_cost += abs(sum)*2
 
     # constraints #21
     for _b in range(len(b)):
-        for _e in range(len(eb)):
-            for _g in range(len(Gb)):
-                for _t in range(len(t)):
-                    sum = 0
-                    for _p in range(len(p)):
-                        # TODO: ij giving out of range
-                        sum += Ix[_p][0]*y111[_b][_e][_g][_p][_t]
-                    
-                    # TODO: ij giving out of range
-                    sum -= volxx[_g][0]*w11[_b][_e][_g][_t]
-                    if sum > 0:
-                        panalty_cost += abs(sum)*2
+        for _e in range(len(eb[_b])):
+            if eb[_e]==1:
+                for _g in range(len(Gb[_b])):
+                    if Gb[_g]==1:
+                        for _t in range(len(t)):
+                            sum = 0
+                            for _p in range(len(p)):
+                                sum += Ix[_p][0]*y111[_b][_e][_g][_p][_t]
+                            
+                            sum -= volxx[_g][0]*w11[_b][_e][_g][_t]
+                            if sum > 0:
+                                panalty_cost += abs(sum)*2
 
     # constraints #22
     for _e in range(len(e)): # TODO: Ej
-        for _i in range(len(i)): # TODO: ij
-            for _j in range(len(j)):
-                for _t in range(len(t)):
-                    sum = 0
-                    for _p in range(len(p)):
-                        # TODO: ij giving out of range
-                        sum += Ix[_p][0]*yb[_e][_i][_j][_p][_t]
-
-                    # TODO: ij giving out of range                    
-                    sum -= Sp[_g][0]*wb[_e][_i][_j][_t]
-                    if sum > 0:
-                        panalty_cost += abs(sum)*2
+        for _j in range(len(j)):
+            for _i in range(len(ij[_j])):
+                if ij[_i]==1:
+                    for _t in range(len(t)):
+                        sum = 0
+                        for _p in range(len(p)):
+                            sum += Ix[_p][0]*yb[_e][_i][_j][_p][_t]
+                   
+                        sum -= Sp[_g][0]*wb[_e][_i][_j][_t]
+                        if sum > 0:
+                            panalty_cost += abs(sum)*2
 
     # constraints #23
-    for _ix in range(len(ix)): # TODO: ij
-        for _j in range(len(j)):
-            for _t in range(len(t)):
-                sum = 0
-                for _m in range(len(m)):
-                    # TODO: ij giving out of range
-                    sum += I[_m][0]*yb1[_ix][_j][_m][_t]
+    for _j in range(len(j)):
+        for _ix in range(len(ij[_j])):
+            if ij[_ix]==1:
+                for _t in range(len(t)):
+                    sum = 0
+                    for _m in range(len(m)):
+                        sum += I[_m][0]*yb1[_ix][_j][_m][_t]
 
-                # TODO: ij giving out of range
-                sum -= Spx[_ix][0]*wb1[_ix][_j][_t]
-                if sum > 0:
-                    panalty_cost += abs(sum)*2
+                    sum -= Spx[_ix][0]*wb1[_ix][_j][_t]
+                    if sum > 0:
+                        panalty_cost += abs(sum)*2
 
     # objective function
     z = trans_cost + purchas_cost + prod_cost + maintain_cost + \
@@ -792,8 +804,8 @@ def ga():
     start_time = time.time()
     # define ga
     global population_size, generation_size, mutation_rate, cross_rate
-    population_size = 1000
-    generation_size = 50
+    population_size = 10
+    generation_size = 5
     cross_rate = 0.9
     mutation_rate = 0.3
 
@@ -815,26 +827,34 @@ def ga():
     # define index size
     global a, b, e, eb, f, g, Gb, i, ix, ixx, j, ij, hj, m, p, t, v, Va, Bapm, ixj
 
-    a = [1, 2, 3] # supplier
-    b = [1, 2, 3, 4, 5] # wholesaler
-    e = [1, 2, 3, 4, 5] # retailer
-    eb = [1, 2, 3, 4, 5]
-    f = [1, 2]
-    g = [1, 2]
-    Gb = [1, 2]
-    i = [1, 2]
-    ix = [1, 2]
-    ixx = [1, 2]
-    j = [1, 2, 3, 4, 5] # collection-center
-    ij = [1, 2]
-    hj = [1, 2]
-    m = [1, 2, 3] # material
-    p = [1, 2, 3] # product
-    t = [1, 2]
-    v = [1, 2]
-    Va = [1, 2]
-    Bapm = [1, 2, 3]
-    ixj = [1, 2]
+    # a = [1, 2, 3] # supplier
+    # b = [1, 2, 3, 4, 5] # wholesaler
+    # e = [1, 2, 3, 4, 5] # retailer
+    # eb = [1, 2, 3, 4, 5]
+    # f = [1, 2]
+    # g = [1, 2]
+    # Gb = [1, 2]
+    # i = [1, 2]
+    # ix = [1, 2]
+    # ixx = [1, 2]
+    # j = [1, 2, 3, 4, 5] # collection-center
+    # ij = [1, 2]
+    # hj = [1, 2]
+    # m = [1, 2, 3] # material
+    # p = [1, 2, 3] # product
+    # t = [1, 2]
+    # v = [1, 2]
+    # Va = [1, 2]
+    # Bapm = [1, 2, 3]
+    # ixj = [1, 2]
+
+    a, b, e, f, g, i, ix, j, hj, m, p, t, v = _index()
+    eb = _eb(e)
+    Gb = _Gb(g)
+    ij = _ij(i) # TODO
+    Va = _Va(v)
+    ixj = _ixj(i) # TODO
+    Bapm = _Bapm(m) # TODO
     # ---
 
     init_pop = []
