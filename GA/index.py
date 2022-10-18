@@ -15,7 +15,6 @@ def get():
     i = []
     ix = []
     j = []  # collection-center
-    hj = []
     m = []  # material
     p = []  # product
     t = []
@@ -58,10 +57,6 @@ def get():
                 for _ in range(_value):
                     j.append(_+1)
 
-            elif (str(_indxname) == 'hj'):
-                for _ in range(_value):
-                    hj.append(_+1)
-
             elif (str(_indxname) == 'm'):
                 for _ in range(_value):
                     m.append(_+1)
@@ -78,4 +73,4 @@ def get():
                 for _ in range(_value):
                     v.append(_+1)
 
-    return a, b, e, f, g, i, ix, j, hj, m, p, t, v
+    return a, b, e, f, g, i, ix, j, m, p, t, v
